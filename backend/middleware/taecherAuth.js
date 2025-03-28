@@ -21,7 +21,14 @@ const isAuthenticated = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
+    // Attach user to request
     req.user = user;
+
+    // Check if the user is a teacher
+    if (user.role !== 'teacher') {
+      return res.status(403).json({ success: false, message: "Access denied. Only teachers can access this resource" });
+    }
+
     next();
   } catch (error) {
     return res.status(500).json({ success: false, message: "Authentication error" });

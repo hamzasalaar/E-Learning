@@ -1,0 +1,40 @@
+const Course = require("../models/Course");
+
+// Get all courses created by a specific teacher
+const getTeacherCourses = async (req, res) => {
+  try {
+    const teacherId = req.user.id; // Get teacher ID from token
+
+    const courses = await Course.find({ teacher: teacherId }).populate("studentsEnrolled", "name email");
+
+    res.status(200).json({ success: true, courses });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Create a new course (Only teachers can create)
+const createCourse = async (req, res) => {
+  try {
+    const { title, description, videoUrl, lectureNotes } = req.body;
+
+    if (!title || !description) {
+      return res.status(400).json({ success: false, message: "Title and Description are required!" });
+    }
+
+    const newCourse = new Course({
+      title,
+      description,
+      teacher: req.user.id, // Set teacher ID from logged-in user
+      videoUrl,
+      lectureNotes,
+    });
+
+    await newCourse.save();
+    res.status(201).json({ success: true, message: "Course created successfully!", course: newCourse });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { getTeacherCourses, createCourse };

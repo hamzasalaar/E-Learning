@@ -4,7 +4,10 @@ const UserModel = require("../models/userModel");
 
 const Register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
+
+    if(!["student", "teacher", "admin"].includes(role)) {
+      return res.status(400).json({message: "Invalid role"});}
 
     const userExists = await UserModel.findOne({ email });
     if (userExists) {
@@ -28,6 +31,7 @@ const Register = async (req, res) => {
       name,
       email,
       password: hashPassword,
+      role,
     });
 
     await newUser.save()
@@ -51,9 +55,7 @@ const Login = async (req, res) => {
 
     const user = await UserModel.findOne({ email });
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Invalid credentials!" });
+      return res.status(401).json({ success: false, message: "Invalid credentials!" });
     }
 
     // Check if the account is locked due to too many failed attempts
@@ -66,30 +68,26 @@ const Login = async (req, res) => {
 
     const passwordValid = await bcrypt.compare(password, user.password);
     if (!passwordValid) {
-
       user.failedAttempts += 1;
 
       if (user.failedAttempts >= 5) {
-        user.lockUntil = Date.now() + 15 * 60 * 1000; 
+        user.lockUntil = Date.now() + 15 * 60 * 1000; // Lock for 15 minutes
       }
 
       await user.save();
 
-      return res
-        .status(404)
-        .json({ success: false, message: "Invalid Credentials!" });
+      return res.status(401).json({ success: false, message: "Invalid Credentials!" });
     }
 
+    // Reset failed attempts on successful login
     user.failedAttempts = 0;
-    user.lockUntil = null; 
+    user.lockUntil = null;
     await user.save();
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "30d",
-      }
+      { expiresIn: "30d" }
     );
 
     res.cookie("token", token, {
@@ -99,16 +97,17 @@ const Login = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    res
-      .status(200)
-      .json({ success: true, message: "Login successfull!", user });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message,
+    res.status(200).json({
+      success: true,
+      message: "Login successful!",
+      user: { id: user._id, email: user.email, role: user.role }, // Only return safe user data
+      token, // Include token in response
     });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 };
+
 
 const Logout = async (req, res) => {
   try {

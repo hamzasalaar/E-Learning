@@ -8,6 +8,7 @@ export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("student"); // Default role is "student"
   const navigate = useNavigate(); // Initialize useNavigate
 
   const handleSubmit = async (e) => {
@@ -16,7 +17,7 @@ export default function Register() {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/auth/register",
-        { name, email, password }
+        { name, email, password, role }
       );
 
       // Handle successful registration
@@ -47,7 +48,7 @@ export default function Register() {
           <input
             type="text"
             id="username"
-            placeholder="Enter your username"
+            placeholder="Enter a username"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -76,6 +77,14 @@ export default function Register() {
             pattern="^(?=.*[A-Za-z])(?=.*\d).{8,16}$"
             title="Password must be at least 8 characters long and contain both letters and numbers."
           />
+        </div>
+        {/* Role Selection */}
+        <div className="input-group">
+          <label htmlFor="role">Select Role</label>
+          <select id="role" value={role} onChange={(e) => setRole(e.target.value)}>
+            <option value="student">Student</option>
+            <option value="teacher">Teacher</option>
+          </select>
         </div>
         <button type="submit" className="register-button">
           Register
