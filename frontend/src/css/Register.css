@@ -1,0 +1,96 @@
+/* 🔹 Register Page Container */
+.register-container {
+  width: 100%;
+  max-width: 450px;
+  margin: 50px auto;
+  padding: 35px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+/* 🔹 Register Heading */
+.register-heading {
+  font-size: 28px;
+  color: #667eea;
+  margin-bottom: 20px;
+}
+
+/* 🔹 Input Fields */
+.input-group {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px; /* Slightly smaller padding */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px; /* Reduced font size */
+  margin-top: 5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.input-group input:focus {
+  border-color: #6b46c1;
+  outline: none;
+}
+
+/* 🔹 Register Button */
+.register-button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.register-button:hover {
+  background: linear-gradient(135deg, #5a67d8, #6b46c1);
+  transform: scale(1.05);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+}
+
+/* 🔹 Login Link */
+.login-link {
+  margin-top: 15px;
+  font-size: 16px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 🔹 Responsive Design */
+@media (max-width: 480px) {
+  .register-container {
+    width: 90%;
+    padding: 25px;
+  }
+
+  .register-heading {
+    font-size: 24px;
+  }
+
+  .input-group input {
+    padding: 10px;
+    font-size: 14px; /* Reduced for mobile */
+  }
+
+  .register-button {
+    padding: 12px;
+    font-size: 14px;
+  }
+}
