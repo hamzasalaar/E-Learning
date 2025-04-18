@@ -5,6 +5,7 @@ const cookieparser = require("cookie-parser");
 const connectDB = require("./utils/db");
 const AuthRoute = require("./routes/authRoute");
 const AdminRoute = require("./routes/adminRoute");
+const TeacherRoute = require("./routes/teacherRoute");
 
 dotenv.config();
 
@@ -12,10 +13,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 // Define the allowed origins
-const allowedOrigins = [
-  "http://localhost:3001",
-  "http://localhost:5173",
-];
+const allowedOrigins = ["http://localhost:3001", "http://localhost:5173"];
 
 connectDB();
 
@@ -30,13 +28,15 @@ app.use(
       } else {
         callback(new Error("Not allowed by CORS"));
       }
-    },    credentials: true,
+    },
+    credentials: true,
   })
 );
 app.use(cookieparser());
 
 app.use("/api/auth", AuthRoute);
 app.use("/api/admin", AdminRoute);
+app.use("/api/teacher", TeacherRoute);
 
 app.get("/", (req, res) => {
   res.send("Hello World");

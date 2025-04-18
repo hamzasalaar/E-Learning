@@ -1,10 +1,10 @@
 const UserModel = require("../models/userModel");
-const userModel = require("../models/userModel");
+const CourseModel = require('../models/courseModel');
 const mongoose = require("mongoose");
 
 const getUser = async (req, res) => {
   try {
-    const users = await userModel.find();
+    const users = await UserModel.find();
     res.status(200).json({ success: true, data: users });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -20,7 +20,7 @@ const deleteUser = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid user ID" });
     }
 
-    const user = await userModel.findById(userId);
+    const user = await UserModel.findById(userId);
 
     if (!user)
       return res
@@ -32,7 +32,7 @@ const deleteUser = async (req, res) => {
         .status(401)
         .json({ success: false, message: "Admin can't be deleted!" });
     
-    await userModel.findByIdAndDelete(userId);
+    await UserModel.findByIdAndDelete(userId);
     
     res
       .status(200)
@@ -64,8 +64,27 @@ const updateUser = async (req, res) => {
   }
 }
 
+
+const getCourses = async (req, res) => {
+    try {
+        // Only allow admins to access this
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
+        }
+
+        const courses = await CourseModel.find()
+            .populate('teacher', 'name email') // Populate teacher info (name and email only)
+            .exec();
+
+        res.status(200).json({ success: true, courses });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 module.exports = {
   getUser,
   deleteUser,
   updateUser,
+  getCourses,
 };

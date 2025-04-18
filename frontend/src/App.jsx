@@ -15,7 +15,7 @@ export default function App() {
     <BrowserRouter>
       <Toaster />
       <div className="app-container">
-        <h1>CRM</h1>
+        <h1>E-Learning</h1>
         <Routes>
           {/* User Layout */}
           <Route path="/" element={<UserLayout />}>

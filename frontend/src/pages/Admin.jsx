@@ -76,7 +76,7 @@ export default function Admin() {
   const handleUpdate = async () => {
     try {
       const response = await axios.put(
-        `http://localhost:3000/api/admin/updateuser/${editingUser}`,
+        `http://localhost:3000/api/admin/update/${editingUser}`,
         { name: editName, email: editEmail, role: editRole },
         { withCredentials: true }
       );
@@ -219,7 +219,7 @@ export default function Admin() {
           </tbody>
         </table>
         <br />
-        <button className="register-button" onClick={handleLogout}>
+        <button className="logout-btn" onClick={handleLogout}>
           Logout
         </button>
       </div>
