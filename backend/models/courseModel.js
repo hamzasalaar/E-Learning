@@ -17,6 +17,7 @@ const CourseSchema = new mongoose.Schema(
       default: "pending",
       enum: ["pending", "approved", "rejected"],
     },
+    rejectionReason: { type: String, default: null },
     price: { type: Number, required: true, min: 0 },
     rating: { type: Number, default: 0 },
     reviews: [

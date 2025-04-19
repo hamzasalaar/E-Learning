@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const path = require("path");
 const cookieparser = require("cookie-parser");
 const connectDB = require("./utils/db");
 const AuthRoute = require("./routes/authRoute");
@@ -17,6 +18,7 @@ const allowedOrigins = ["http://localhost:3001", "http://localhost:5173"];
 
 connectDB();
 
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(
@@ -37,6 +39,8 @@ app.use(cookieparser());
 app.use("/api/auth", AuthRoute);
 app.use("/api/admin", AdminRoute);
 app.use("/api/teacher", TeacherRoute);
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.get("/", (req, res) => {
   res.send("Hello World");
