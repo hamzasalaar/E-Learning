@@ -6,8 +6,9 @@ const Register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    if(!["student", "teacher", "admin"].includes(role)) {
-      return res.status(400).json({message: "Invalid role"});}
+    if (!["student", "teacher", "admin"].includes(role)) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
 
     const userExists = await UserModel.findOne({ email });
     if (userExists) {
@@ -34,7 +35,7 @@ const Register = async (req, res) => {
       role,
     });
 
-    await newUser.save()
+    await newUser.save();
 
     res.status(201).json({
       message: "User registered successfully!",
@@ -55,28 +56,32 @@ const Login = async (req, res) => {
 
     const user = await UserModel.findOne({ email });
     if (!user) {
-      return res.status(401).json({ success: false, message: "Invalid credentials!" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials!" });
     }
 
     // Check if the account is locked due to too many failed attempts
-    if (user.lockUntil && user.lockUntil > Date.now()) {
-      return res.status(403).json({
-        success: false,
-        message: `Account is locked. Try again after ${new Date(user.lockUntil).toLocaleString()}`,
-      });
-    }
+    // if (user.lockUntil && user.lockUntil > Date.now()) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     message: `Account is locked. Try again after ${new Date(user.lockUntil).toLocaleString()}`,
+    //   });
+    // }
 
     const passwordValid = await bcrypt.compare(password, user.password);
     if (!passwordValid) {
       user.failedAttempts += 1;
 
-      if (user.failedAttempts >= 5) {
-        user.lockUntil = Date.now() + 15 * 60 * 1000; // Lock for 15 minutes
-      }
+      // if (user.failedAttempts >= 5) {
+      //   user.lockUntil = Date.now() + 15 * 60 * 1000; // Lock for 15 minutes
+      // }
 
       await user.save();
 
-      return res.status(401).json({ success: false, message: "Invalid Credentials!" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid Credentials!" });
     }
 
     // Reset failed attempts on successful login
@@ -107,7 +112,6 @@ const Login = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
-
 
 const Logout = async (req, res) => {
   try {

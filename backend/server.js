@@ -7,6 +7,7 @@ const connectDB = require("./utils/db");
 const AuthRoute = require("./routes/authRoute");
 const AdminRoute = require("./routes/adminRoute");
 const TeacherRoute = require("./routes/teacherRoute");
+const StudentRoute = require("./routes/studentRoute");
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ app.use(cookieparser());
 app.use("/api/auth", AuthRoute);
 app.use("/api/admin", AdminRoute);
 app.use("/api/teacher", TeacherRoute);
+app.use("/api/student", StudentRoute);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
