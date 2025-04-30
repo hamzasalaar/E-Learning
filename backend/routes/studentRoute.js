@@ -11,6 +11,7 @@ const {
   updateProgress,
   getStudentProfile,
   updateStudentProfile,
+  markLectureCompleted,
 } = require("../controllers/studentController");
 
 const StudentRoute = express.Router();
@@ -28,6 +29,8 @@ StudentRoute.post("/unenroll/:courseId", unenrollFromCourse);
 StudentRoute.post("/:courseId/review", createReview);
 StudentRoute.put("/:courseId/update-review", updateReview);
 StudentRoute.delete("/:courseId/review", deleteReview);
+
+StudentRoute.post("/courses/:courseId/lectures/:lectureId/complete", markLectureCompleted); // Mark a lecture as completed
 
 StudentRoute.put("/progress/:courseId", updateProgress); // Update progress in a course
 

@@ -7,30 +7,34 @@ import Register from "./pages/Register";
 import Admin from "./pages/Admin";
 import { Toaster } from "react-hot-toast";
 import AdminLayout from "./Layouts/AdminLayout";
-import UserLayout from "./Layouts/UserLayout";
+import StudentLayout from "./Layouts/StudentLayout";
 import PublicLayout from "./Layouts/PublicLayout";
+import StudentDashboard from "./components/student/Dashboard";
+import Courses from "./components/student/Courses";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Toaster />
       <div className="app-container">
-        <h1>E-Learning</h1>
         <Routes>
-          {/* User Layout */}
-          <Route path="/" element={<UserLayout />}>
+          {/* Public Layout */}
+          <Route path="/" element={<PublicLayout />}>
             <Route index element={<Home />} />
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
+          </Route>
+
+          {/* Student Layout */}
+          <Route path="/student" element={<StudentLayout />}>
+            <Route index element={<StudentDashboard />} />
+            <Route path="courses" element={<Courses />} />
           </Route>
 
           {/* Admin Layout */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Admin />} />
-          </Route>
-
-          {/* Public Routes */}
-          <Route path="/" element={<PublicLayout />}>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            {/* Add more admin routes here */}
           </Route>
         </Routes>
       </div>

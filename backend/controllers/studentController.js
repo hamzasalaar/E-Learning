@@ -34,14 +34,20 @@ const enrollInCourse = async (req, res) => {
     course.studentsEnrolled.push(studentId);
     await course.save();
 
-    const progress = new Progress({
+    // Create Progress entry if not exists
+    const existingProgress = await Progress.findOne({
       student: studentId,
       course: courseId,
-      completed: false,
-      progressPercent: 0,
-      lastAccessed: Date.now(),
     });
-    await progress.save();
+    if (!existingProgress) {
+      const totalLectures = course.lectures.length || 0;
+      await Progress.create({
+        student: studentId,
+        course: courseId,
+        completedLectures: 0,
+        totalLectures,
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -121,8 +127,7 @@ const getEnrolledCourses = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      courses,
-      coursesWithProgress
+      coursesWithProgress,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -161,6 +166,49 @@ const unenrollFromCourse = async (req, res) => {
       success: true,
       message: "Successfully unenrolled from the course",
       courseId,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+const markLectureCompleted = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const { courseId, lectureId } = req.params;
+
+    const progress = await Progress.findOne({
+      student: studentId,
+      course: courseId,
+    });
+
+    if (!progress) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Progress record not found" });
+    }
+
+    // Prevent duplicate marking
+    if (progress.completedLectureIds.includes(lectureId)) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Lecture already marked as completed",
+        });
+    }
+
+    progress.completedLectureIds.push(lectureId);
+    progress.completedLectures = progress.completedLectureIds.length;
+    progress.progressPercent = Math.round(
+      (progress.completedLectures / progress.totalLectures) * 100
+    );
+
+    await progress.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Lecture marked as completed",
+      progress,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -384,4 +432,5 @@ module.exports = {
   updateProgress,
   getStudentProfile,
   updateStudentProfile,
+  markLectureCompleted,
 };

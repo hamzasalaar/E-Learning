@@ -36,9 +36,9 @@ export default function Login() {
         if (role === "admin") {
           navigate("/admin");
         } else if (role === "teacher") {
-          navigate("/");
+          navigate("/teacher");
         } else if (role === "student") {
-          navigate("/student-dashboard");
+          navigate("/student/dashboard");
         }
       } else if (response.status === 403) {
         toast.error(

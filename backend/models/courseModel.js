@@ -11,6 +11,13 @@ const CourseSchema = new mongoose.Schema(
     },
     videoUrl: { type: String },
     lectureNotes: { type: String },
+    lectures: [
+      {
+        title: { type: String, required: true },
+        videoUrl: { type: String, required: true },
+        duration: { type: String, required: true },
+      },
+    ],
     studentsEnrolled: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     status: {
       type: String,

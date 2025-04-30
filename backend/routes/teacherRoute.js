@@ -29,7 +29,7 @@ TeacherRoute.put(
   upload.single("lectureNotes"),
   updateCourse
 ); // Update a course
-TeacherRoute.delete("/delete/:courseId", isTeacher, deleteCourse); // Delete a course
+TeacherRoute.delete("/delete/:courseId", isTeacher, deleteCourse);
 TeacherRoute.get(
   "/courses/:courseId/enrollments",
   isTeacher,

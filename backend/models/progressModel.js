@@ -12,14 +12,17 @@ const progressSchema = new mongoose.Schema(
       ref: "Course",
       required: true,
     },
-    completed: {
-      type: Boolean,
-      default: false,
-    },
-    progressPercent: {
+    completedLectures: {
       type: Number,
-      default: 0, // value between 0 and 100
+      default: 0,
     },
+    totalLectures: {
+      type: Number,
+      required: true,
+    },
+    completedLectureIds: [
+      { type: mongoose.Schema.Types.ObjectId, required: true },
+    ],
     lastAccessed: {
       type: Date,
       default: Date.now,
@@ -27,6 +30,9 @@ const progressSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Optional: unique progress entry per student+course
+progressSchema.index({ student: 1, course: 1 }, { unique: true });
 
 const Progress = mongoose.model("Progress", progressSchema);
 module.exports = Progress;
