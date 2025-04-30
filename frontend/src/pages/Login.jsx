@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, resolvePath, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../css/Login.css";
 import { useState } from "react";
@@ -36,9 +36,9 @@ export default function Login() {
         if (role === "admin") {
           navigate("/admin");
         } else if (role === "teacher") {
-          navigate("/");
+          navigate("/dashboard");
         } else if (role === "student") {
-          navigate("/student-dashboard");
+          navigate("/");
         }
       } else if (response.status === 403) {
         toast.error(

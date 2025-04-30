@@ -18,7 +18,8 @@ export const updateUser=createAsyncThunk('updateuser',async()=>{
  const initialState={
     loading:null,
     error:null,
-    user:null
+    user:null,
+    message: null, // ✅ new field
  }
 const  AuthSlice=createSlice({
     name:"Auth",
@@ -26,11 +27,13 @@ const  AuthSlice=createSlice({
     reducers:{
         SetUser:(state,action)=>{
             state.user= action.payload
+            state.message = "Welcome to CourseMania 🎉"; // ✅
         },
         Logout:(state)=>{
             state.user=null,
             state.loading=null,
-            state.error=null
+            state.error=null,
+            state.message = "You logout successfully, hope to see you soon 👋"; // ✅
         }
     },
 
@@ -52,6 +55,6 @@ const  AuthSlice=createSlice({
    
 })
 
-export const {SetUser,Logout}=AuthSlice.actions
+export const {SetUser,Logout, ClearMessage}=AuthSlice.actions
 
 export default AuthSlice.reducer
