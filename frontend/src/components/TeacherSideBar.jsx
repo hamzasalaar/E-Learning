@@ -1,4 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { Logout } from "../redux/AuthSlice"; // Import the Logout action
 import {
   FaUser,
   FaDollarSign,
@@ -6,20 +11,48 @@ import {
   FaCog,
   FaMoneyCheckAlt,
   FaChalkboardTeacher,
-  FaEllipsisV
 } from "react-icons/fa";
 
 export default function TeacherSidebar({ onLogout }) {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const handleMenuToggle = () => {
-    setMenuOpen((prev) => !prev);
+  const handleLogout = async () => {
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/api/auth/logout",
+        {},
+        { withCredentials: true }
+      );
+      if (res.status === 200) {
+        dispatch(Logout());
+        navigate("/");
+      }
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
   };
+  // Access user data from Redux store
+  const user = useSelector((state) => state.Auth.user); // Access the user field from the Auth slice
+  // console.log(user); // Log the user data for debugging
 
   return (
     <aside className="sidebar">
-      <h2 className="brand">Teacher Dashboard</h2>
+      {/* User Profile Section */}
+      <div className="user-profile-top">
+        <div className="user-info">
+          <img
+            src={user?.profilePicture || "https://via.placeholder.com/60"} // Use user's profile picture or a placeholder
+            alt="Profile"
+            className="profile-pic"
+          />
+          <span className="user-name">{user?.name || "Guest"}</span>{" "}
+          {/* Display user's name */}
+        </div>
+        <button className="update-profile-button">Update Profile</button>
+      </div>
 
+      {/* Navigation Menu */}
       <nav className="menu">
         <a href="/teacher/addcourse" className="menu-item">
           <FaChalkboardTeacher /> Add Course
@@ -41,26 +74,11 @@ export default function TeacherSidebar({ onLogout }) {
         </a>
       </nav>
 
-      {/* User Profile Section */}
-      <div className="user-profile">
-        <div className="user-info">
-          <img
-            src="https://via.placeholder.com/40" // Replace with profile picture URL if you have it
-            alt="Profile"
-            className="profile-pic"
-          />
-          <span className="user-name">Jane Doe</span>
-          <button className="menu-button" onClick={handleMenuToggle}>
-            <FaEllipsisV />
-          </button>
-        </div>
-
-        {menuOpen && (
-          <div className="dropdown-menu">
-            <button className="dropdown-item">Update Profile</button>
-            <button className="dropdown-item" onClick={onLogout}>Logout</button>
-          </div>
-        )}
+      {/* Logout Button */}
+      <div className="logout-section">
+        <button className="logout-button" onClick={handleLogout}>
+          Logout
+        </button>
       </div>
 
       <style>{`
@@ -75,15 +93,52 @@ export default function TeacherSidebar({ onLogout }) {
           height: 100vh;
         }
 
-        .brand {
-          font-size: 20px;
+        .user-profile-top {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
           margin-bottom: 30px;
+        }
+
+        .user-info {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .profile-pic {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+
+        .user-name {
+          font-weight: bold;
+          font-size: 16px;
+        }
+
+        .update-profile-button {
+          margin-top: 10px;
+          padding: 8px 15px;
+          background-color: #0ab3a3;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+        }
+
+        .update-profile-button:hover {
+          background-color: #089c8d;
         }
 
         .menu {
           display: flex;
           flex-direction: column;
           gap: 15px;
+          flex-grow: 1;
         }
 
         .menu-item {
@@ -99,66 +154,23 @@ export default function TeacherSidebar({ onLogout }) {
           text-decoration: underline;
         }
 
-        .user-profile {
+        .logout-section {
           margin-top: auto;
-          position: relative;
-          padding-top: 20px;
-          border-top: 1px solid #333;
+          text-align: center;
         }
 
-        .user-info {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          cursor: pointer;
-        }
-
-        .profile-pic {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          object-fit: cover;
-        }
-
-        .user-name {
-          font-weight: bold;
-          flex-grow: 1;
-        }
-
-        .menu-button {
-          background: none;
-          border: none;
+        .logout-button {
+          padding: 10px 20px;
+          background-color: #dc3545;
           color: white;
-          font-size: 18px;
-          cursor: pointer;
-        }
-
-        .dropdown-menu {
-          position: absolute;
-          bottom: 60px;
-          left: 20px;
-          background: white;
-          color: black;
-          border-radius: 6px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-          min-width: 160px;
-          z-index: 100;
-        }
-
-        .dropdown-item {
-          padding: 10px 15px;
-          background: white;
           border: none;
-          text-align: left;
+          border-radius: 4px;
           cursor: pointer;
           font-size: 14px;
         }
 
-        .dropdown-item:hover {
-          background: #f0f0f0;
+        .logout-button:hover {
+          background-color: #c82333;
         }
 
         /* Responsive Styles */
@@ -171,7 +183,7 @@ export default function TeacherSidebar({ onLogout }) {
             justify-content: space-around;
           }
 
-          .brand {
+          .user-profile-top {
             display: none;
           }
 
@@ -184,7 +196,7 @@ export default function TeacherSidebar({ onLogout }) {
             font-size: 14px;
           }
 
-          .user-profile {
+          .logout-section {
             margin-top: 0;
           }
         }

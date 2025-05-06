@@ -3,11 +3,11 @@ const fs = require("fs");
 
 const createCourse = async (req, res) => {
   try {
-    console.log("body", req.body);
-    console.log("file", req.file); // Check if file is being received
+    console.log("files", req.files); // Check if multiple files are being received
 
     const { title, description, videoUrl, price } = req.body;
-    const lectureNotes = req.file ? req.file.path : null; // Assuming lecture notes are uploaded as a file
+    // Get the paths of all uploaded lecture notes
+    const lectureNotes = req.files ? req.files.map((file) => file.path) : [];
 
     if (req.user.role !== "teacher") {
       return res.status(403).json({
@@ -19,7 +19,7 @@ const createCourse = async (req, res) => {
     if (!title || !description || !price) {
       return res.status(400).json({
         success: false,
-        message: "Title, Description and Price are required!",
+        message: "Title, Description, and Price are required!",
       });
     }
 
@@ -27,8 +27,8 @@ const createCourse = async (req, res) => {
       title,
       description,
       teacher: req.user.id, // Set teacher ID from logged-in user
-      videoUrl,
-      lectureNotes,
+      videoUrl, // Placeholder for future video lecture URLs
+      lectureNotes, // Store the array of file paths for lecture notes
       studentsEnrolled: [], // Initialize with an empty array
       status: "pending", // Default status
       price,
@@ -59,14 +59,8 @@ const approveCourse = async (req, res) => {
         .json({ success: false, message: "Course not found!" });
     }
 
-    if (course.status !== "pending") {
-      return res.status(400).json({
-        success: false,
-        message: "Course is not pending for approval!",
-      });
-    }
-
     course.status = "approved";
+    course.rejectionReason = null; // Clear any previous rejection reason
     await course.save();
 
     res.status(200).json({
@@ -91,10 +85,10 @@ const rejectCourse = async (req, res) => {
         .json({ success: false, message: "Course not found!" });
     }
 
-    if (course.status !== "pending") {
+    if (!rejectionReason || rejectionReason.trim() === "") {
       return res.status(400).json({
         success: false,
-        message: "Course is not pending for approval!",
+        message: "Rejection reason is required.",
       });
     }
 

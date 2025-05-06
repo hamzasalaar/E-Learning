@@ -8,16 +8,23 @@ export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState(""); // New state for confirm password
   const [role, setRole] = useState("student"); // Default role is "student"
   const navigate = useNavigate(); // Initialize useNavigate
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
     try {
       const response = await axios.post(
         "http://localhost:3000/api/auth/register",
-        { name, email, password, role }
+        { name, email, password, confirmPassword, role }
       );
 
       // Handle successful registration
@@ -76,6 +83,17 @@ export default function Register() {
             required
             pattern="^(?=.*[A-Za-z])(?=.*\d).{8,16}$"
             title="Password must be at least 8 characters long and contain both letters and numbers."
+          />
+        </div>
+        <div className="input-group">
+          <label htmlFor="confirmPassword">Confirm Password</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            placeholder="Confirm your password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
           />
         </div>
         {/* Role Selection */}

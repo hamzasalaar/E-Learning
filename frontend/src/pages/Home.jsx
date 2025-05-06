@@ -8,7 +8,6 @@ import teacherImage1 from "../assets/images/teacher-1.jpg";
 import teacherImage2 from "../assets/images/teacher-2.jpg";
 import teacherImage3 from "../assets/images/teacher-3.jpg";
 import teacherImage4 from "../assets/images/teacher-4.jpg";
-import { ClearMessage } from "../redux/AuthSlice"; // update the path if needed
 
 export default function Home() {
 

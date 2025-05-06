@@ -8,13 +8,16 @@ export default function MyCourses() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch the student's enrolled courses
     const fetchCourses = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/student/courses", {
-          withCredentials: true,
-        });
-        setCourses(res.data);
+        const res = await axios.get(
+          "http://localhost:3000/api/student/my-courses",
+          {
+            withCredentials: true,
+          }
+        );
+        console.log("API Response:", res.data); // Debugging log
+        setCourses(res.data.coursesWithProgress || []); // Use coursesWithProgress
         setLoading(false);
       } catch {
         setError("Failed to load courses");
@@ -45,20 +48,24 @@ export default function MyCourses() {
           <span>Progress</span>
         </div>
 
-        {courses.map((course) => (
-          <Link
-            to={`/student/course-content/${course.id}`} // Navigate to course content
-            className="course-item"
-            key={course.id}
-            style={{ textDecoration: "none", color: "inherit" }}
-          >
-            <div className="course-info">
-              <img src={course.image} alt={course.title} />
-              <span className="course-title">{course.title}</span>
-            </div>
-            <span>{course.progress}%</span>
-          </Link>
-        ))}
+        {courses.length > 0 ? (
+          courses.map((course) => (
+            <Link
+              to={`/student/course-content/${course._id}`} // Navigate to course content
+              className="course-item"
+              key={course._id}
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              <div className="course-info">
+                <img src={course.image} alt={course.title} />
+                <span className="course-title">{course.title}</span>
+              </div>
+              <span>{course.progress.percentage}%</span>
+            </Link>
+          ))
+        ) : (
+          <div>No courses found</div>
+        )}
       </div>
 
       <style>{`

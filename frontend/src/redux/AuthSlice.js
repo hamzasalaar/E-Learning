@@ -14,7 +14,6 @@ export const updateUser=createAsyncThunk('updateuser',async()=>{
 })
 
 
-
  const initialState={
     loading:null,
     error:null,

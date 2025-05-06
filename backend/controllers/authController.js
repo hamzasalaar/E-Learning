@@ -4,10 +4,17 @@ const UserModel = require("../models/userModel");
 
 const Register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, confirmPassword, role } = req.body;
 
     if (!["student", "teacher", "admin"].includes(role)) {
       return res.status(400).json({ message: "Invalid role" });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match",
+      });
     }
 
     const userExists = await UserModel.findOne({ email });
@@ -105,7 +112,7 @@ const Login = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Login successful!",
-      user: { id: user._id, email: user.email, role: user.role }, // Only return safe user data
+      user: { id: user._id, email: user.email, role: user.role },
       token, // Include token in response
     });
   } catch (error) {

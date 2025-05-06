@@ -20,13 +20,13 @@ TeacherRoute.get("/courses", isTeacher, getTeacherCourses);
 TeacherRoute.post(
   "/create-course",
   isTeacher,
-  upload.single("lectureNotes"),
+  upload.array("lectureNotes", 10),
   createCourse
 ); // Create a course
 TeacherRoute.put(
   "/update-course/:courseId",
   isTeacher,
-  upload.single("lectureNotes"),
+  upload.array("lectureNotes", 10),
   updateCourse
 ); // Update a course
 TeacherRoute.delete("/delete/:courseId", isTeacher, deleteCourse); // Delete a course

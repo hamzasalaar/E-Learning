@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { FaStar, } from "react-icons/fa";
-import "../styles.css";
+// import "../styles.css";
 import courseImage1 from "../assets/images/course-1.jpg";
 import cloudAcademyLogo from "../assets/images/logoen@2x.png"; // Import the logo image
 

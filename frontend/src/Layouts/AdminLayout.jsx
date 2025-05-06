@@ -1,23 +1,49 @@
-import React, { useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { Link, Outlet } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import axios from "axios";
+import { Logout } from "../redux/AuthSlice"; // Import the Logout action
+import "../css/AdminLayout.css"; // Import your CSS file for styling
 
-export default function AdminLayout() {
-  const user = useSelector((state) => state.Auth);
+const AdminLayout = () => {
   const navigate = useNavigate();
-  // console.log(user);
+  const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   if (!user || user.role !== "admin") {
-  //     navigate("/login");
-  //   }
-  // }, [user, navigate]);
+  const handleLogout = async () => {
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/api/auth/logout",
+        {},
+        { withCredentials: true }
+      );
+      if (res.status === 200) {
+        dispatch(Logout());
+        navigate("/");
+      }
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
 
   return (
-    <>
-      <div>
+    <div className="admin-layout">
+      <aside className="admin-sidebar">
+        <div className="sidebar-top">
+          <h2>Admin Panel</h2>
+          <nav>
+            <Link to="/admin/users">Manage Users</Link>
+            <Link to="/admin/courses">Manage Courses</Link>
+          </nav>
+        </div>
+        <button className="logout-button" onClick={handleLogout}>
+          Logout
+        </button>
+      </aside>
+      <main className="admin-main">
         <Outlet />
-      </div>
-    </>
+      </main>
+    </div>
   );
-}
+};
+
+export default AdminLayout;

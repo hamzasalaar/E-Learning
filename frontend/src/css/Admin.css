@@ -15,14 +15,15 @@
   color: #333;
 }
 
-.user-list-title {
+.user-list-title,
+.course-list-title {
   font-size: 24px;
   font-weight: 500;
   color: #555;
   margin-bottom: 20px;
 }
 
-/* Table Styling */
+/* Table Styling (Users and Courses) */
 .table-container {
   background-color: #fff;
   border-radius: 8px;
@@ -31,33 +32,40 @@
   overflow-x: auto;
 }
 
-.user-table {
+.user-table,
+.course-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
 }
 
 .user-table th,
-.user-table td {
+.user-table td,
+.course-table th,
+.course-table td {
   padding: 12px 15px;
   text-align: left;
   border-bottom: 1px solid #ddd;
 }
 
-.user-table th {
+.user-table th,
+.course-table th {
   background-color: #f4f4f4;
   color: #333;
 }
 
-.user-table td {
+.user-table td,
+.course-table td {
   color: #555;
 }
 
-.user-table tr:hover {
+.user-table tr:hover,
+.course-table tr:hover {
   background-color: #f1f1f1;
 }
 
-.no-users {
+.no-users,
+.no-courses {
   text-align: center;
   font-style: italic;
   color: #777;
@@ -75,45 +83,30 @@
 }
 
 /* Buttons */
-.delete-btn {
-  padding: 5px 10px;
-  font-size: 12px;
-  border-radius: 5px;
-  cursor: pointer;
-  border: none;
-  background-color: #da4754;
-  color: white;
-  transition: all 0.3s ease-in-out;
-}
-.update-btn {
-  padding: 5px 10px;
-  font-size: 12px;
-  border-radius: 5px;
-  cursor: pointer;
-  border: none;
-  background-color: #4caf50;
-  color: white;
-  transition: all 0.3s ease-in-out;
-}
-.edit-btn {
-  padding: 5px 10px;
-  font-size: 12px;
-  border-radius: 5px;
-  cursor: pointer;
-  border: none;
-  background-color: #764ba2;
-  color: white;
-  transition: all 0.3s ease-in-out;
-}
+.delete-btn,
+.update-btn,
+.edit-btn,
 .cancel-btn {
   padding: 5px 10px;
   font-size: 12px;
   border-radius: 5px;
   cursor: pointer;
   border: none;
-  background-color: #667eea;
   color: white;
   transition: all 0.3s ease-in-out;
+}
+
+.delete-btn {
+  background-color: #da4754;
+}
+.update-btn {
+  background-color: #4caf50;
+}
+.edit-btn {
+  background-color: #764ba2;
+}
+.cancel-btn {
+  background-color: #667eea;
 }
 .logout-btn {
   width: 50%;
@@ -130,15 +123,12 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-.delete-btn:hover,
-.logout-btn:hover {
+.delete-btn:hover {
   background-color: #d4364f;
 }
-
 .logout-btn {
   background-color: #007bff;
 }
-
 .logout-btn:hover {
   background-color: #0056b3;
 }
@@ -151,6 +141,7 @@
   border: none;
 }
 
+/* Modal Form */
 .form-modal {
   position: fixed;
   top: 0;
@@ -197,7 +188,9 @@
   }
 
   .user-table th,
-  .user-table td {
+  .user-table td,
+  .course-table th,
+  .course-table td {
     font-size: 14px;
   }
 
@@ -205,7 +198,8 @@
     font-size: 28px;
   }
 
-  .user-list-title {
+  .user-list-title,
+  .course-list-title {
     font-size: 20px;
   }
 
@@ -213,4 +207,40 @@
   .logout-btn {
     padding: 6px 15px;
   }
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.modal textarea {
+  width: 100%;
+  margin: 10px 0;
+  resize: vertical;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }

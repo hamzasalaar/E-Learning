@@ -10,7 +10,7 @@ const CourseSchema = new mongoose.Schema(
       required: true,
     },
     videoUrl: { type: String },
-    lectureNotes: { type: String },
+    lectureNotes: [{ type: String }],
     studentsEnrolled: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     status: {
       type: String,

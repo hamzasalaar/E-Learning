@@ -6,16 +6,20 @@ const AddCourse = () => {
     title: "",
     description: "",
     videoUrl: "",
-    lectureNotes: "",
     price: 0,
   });
 
+  const [lectureNotes, setLectureNotes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    setLectureNotes(e.target.files);
   };
 
   const handleSubmit = async (e) => {
@@ -24,10 +28,32 @@ const AddCourse = () => {
     setMessage("");
 
     try {
-      const res = await axios.post("http://localhost:3000/api/courses", formData, { withCredentials: true });
+      const data = new FormData();
+      data.append("title", formData.title);
+      data.append("description", formData.description);
+      data.append("videoUrl", formData.videoUrl);
+      data.append("price", formData.price);
+
+      for (let i = 0; i < lectureNotes.length; i++) {
+        data.append("lectureNotes", lectureNotes[i]);
+      }
+
+      const res = await axios.post(
+        "http://localhost:3000/api/teacher/create-course",
+        data,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // if using JWT
+          },
+        }
+      );
+
       if (res.status === 201) {
         setMessage("Course added successfully!");
-        setFormData({ title: "", description: "", videoUrl: "", lectureNotes: "", price: 0 });
+        setFormData({ title: "", description: "", videoUrl: "", price: 0 });
+        setLectureNotes([]);
       }
     } catch (err) {
       console.error(err);
@@ -40,30 +66,59 @@ const AddCourse = () => {
   return (
     <div className="add-course">
       <h2>Add a New Course</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
         <label>
           Title:
-          <input type="text" name="title" value={formData.title} onChange={handleChange} required />
+          <input
+            type="text"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            required
+          />
         </label>
 
         <label>
           Description:
-          <textarea name="description" value={formData.description} onChange={handleChange} required />
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            required
+          />
         </label>
 
         <label>
           Video URL:
-          <input type="url" name="videoUrl" value={formData.videoUrl} onChange={handleChange} />
+          <input
+            type="url"
+            name="videoUrl"
+            value={formData.videoUrl}
+            onChange={handleChange}
+          />
         </label>
 
         <label>
-          Lecture Notes (URL or text):
-          <input type="text" name="lectureNotes" value={formData.lectureNotes} onChange={handleChange} />
+          Lecture Notes (PDF files):
+          <input
+            type="file"
+            name="lectureNotes"
+            accept=".pdf"
+            multiple
+            onChange={handleFileChange}
+          />
         </label>
 
         <label>
           Price ($):
-          <input type="number" name="price" min="0" value={formData.price} onChange={handleChange} required />
+          <input
+            type="number"
+            name="price"
+            min="0"
+            value={formData.price}
+            onChange={handleChange}
+            required
+          />
         </label>
 
         <button type="submit" disabled={loading}>

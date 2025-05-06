@@ -122,7 +122,7 @@ const getEnrolledCourses = async (req, res) => {
     res.status(200).json({
       success: true,
       courses,
-      coursesWithProgress
+      coursesWithProgress,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -367,6 +367,7 @@ const updateStudentProfile = async (req, res) => {
         id: student._id,
         name: student.name,
         email: student.email,
+        role: student.role,
       },
     });
   } catch (error) {
@@ -374,6 +375,55 @@ const updateStudentProfile = async (req, res) => {
   }
 };
 
+const getCourseDetails = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const studentId = req.user.id;
+
+    const course = await Course.findOne({
+      _id: courseId,
+      studentsEnrolled: studentId,
+    })
+      .select("-reviews -status -rejectionReason")
+      .populate("teacher", "name email")
+      .populate("studentsEnrolled", "name email");
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found or you are not enrolled in this course",
+      });
+    }
+
+    const progress = await Progress.findOne({
+      student: studentId,
+      course: courseId,
+    });
+
+    const courseWithProgress = {
+      ...course.toObject(),
+      progress: progress
+        ? {
+            completedLectures: progress.completedLectures,
+            totalLectures: progress.totalLectures,
+            percentage: Math.round(
+              (progress.completedLectures / progress.totalLectures) * 100
+            ),
+          }
+        : {
+            completedLectures: 0,
+            totalLectures: 0,
+            percentage: 0,
+          },
+    };
+    res.status(200).json({
+      success: true,
+      course: courseWithProgress,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 module.exports = {
   enrollInCourse,
   getEnrolledCourses,
@@ -384,4 +434,5 @@ module.exports = {
   updateProgress,
   getStudentProfile,
   updateStudentProfile,
+  getCourseDetails,
 };

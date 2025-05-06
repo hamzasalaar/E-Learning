@@ -3,7 +3,6 @@ const User = require("../models/userModel");
 
 const getTeacherCourses = async (req, res) => {
   try {
-    // Only allow teachers to access this route
     if (req.user.role !== "teacher") {
       return res
         .status(403)
@@ -12,15 +11,47 @@ const getTeacherCourses = async (req, res) => {
 
     const teacherId = req.user.id;
 
-    const courses = await Course.find({ teacher: teacherId })
-      .sort({ createdAt: -1 }) // optional: latest courses first
+    // Pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+
+    // Search
+    const search = req.query.search || "";
+    const searchRegex = new RegExp(search, "i"); // case-insensitive
+
+    // Sort (default: newest first)
+    const sortBy = req.query.sort || "createdAt"; // e.g., "sales" or "enrollments"
+    const sortOrder = req.query.order === "asc" ? 1 : -1;
+
+    // Build filter
+    const filter = {
+      teacher: teacherId,
+      title: { $regex: searchRegex },
+    };
+
+    const totalCourses = await Course.countDocuments(filter);
+
+    const courses = await Course.find(filter)
+      .sort({ [sortBy]: sortOrder })
+      .skip(skip)
+      .limit(limit)
       .exec();
 
-    res.status(200).json({ success: true, courses });
+    const totalPages = Math.ceil(totalCourses / limit);
+
+    res.status(200).json({
+      success: true,
+      courses,
+      currentPage: page,
+      totalPages,
+      totalCourses,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 const getEnrolledStudents = async (req, res) => {
   try {
