@@ -10,6 +10,7 @@ const CourseSchema = new mongoose.Schema(
       required: true,
     },
     videoUrl: { type: String },
+    imageUrl: { type: String, required: true }, // New field for PostImages URL
     lectureNotes: [{ type: String }],
     studentsEnrolled: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     status: {

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUser } from "../redux/AuthSlice";
-import TeacherDashboard from "../pages/Dashboard";
+import TeacherDashboard from "../pages/TeacherDashboard";
 import TeacherSidebar from "../components/TeacherSideBar";
 import { Outlet } from "react-router-dom";
 

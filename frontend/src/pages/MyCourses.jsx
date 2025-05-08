@@ -10,17 +10,13 @@ export default function MyCourses() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:3000/api/student/my-courses",
-          {
-            withCredentials: true,
-          }
-        );
-        console.log("API Response:", res.data); // Debugging log
-        setCourses(res.data.coursesWithProgress || []); // Use coursesWithProgress
-        setLoading(false);
+        const res = await axios.get("http://localhost:3000/api/student/my-courses", {
+          withCredentials: true,
+        });
+        setCourses(res.data.coursesWithProgress || []);
       } catch {
         setError("Failed to load courses");
+      } finally {
         setLoading(false);
       }
     };
@@ -28,49 +24,47 @@ export default function MyCourses() {
     fetchCourses();
   }, []);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>{error}</div>;
-  }
-
   return (
     <div className="my-courses">
       <div className="simple-bar">
         <h2>My Courses</h2>
       </div>
 
-      <div className="course-list">
-        <div className="course-header">
-          <span>Name</span>
-          <span>Progress</span>
-        </div>
+      {loading ? (
+        <div className="status-message">Loading your enrolled courses...</div>
+      ) : error ? (
+        <div className="status-message error">{error}</div>
+      ) : courses.length === 0 ? (
+        <div className="status-message">You are not enrolled in any courses yet.</div>
+      ) : (
+        <div className="course-list">
+          <div className="course-header">
+            <span>Course</span>
+            <span>Progress</span>
+          </div>
 
-        {courses.length > 0 ? (
-          courses.map((course) => (
+          {courses.map((course) => (
             <Link
-              to={`/student/course-content/${course._id}`} // Navigate to course content
+              to={`/student/course-content/${course._id}`}
               className="course-item"
               key={course._id}
-              style={{ textDecoration: "none", color: "inherit" }}
             >
               <div className="course-info">
-                <img src={course.image} alt={course.title} />
+                <img
+                  src={course.imageUrl || "https://via.placeholder.com/40"}
+                  alt={course.title}
+                />
                 <span className="course-title">{course.title}</span>
               </div>
-              <span>{course.progress.percentage}%</span>
+              <span className="progress">{course.progress?.percentage || 0}%</span>
             </Link>
-          ))
-        ) : (
-          <div>No courses found</div>
-        )}
-      </div>
+          ))}
+        </div>
+      )}
 
       <style>{`
         .my-courses {
-          font-family: sans-serif;
+          font-family: "Segoe UI", sans-serif;
           padding: 30px;
           background: #f8f9fc;
           min-height: 100vh;
@@ -79,28 +73,22 @@ export default function MyCourses() {
         .simple-bar {
           background-color: #0ab3a3;
           color: white;
-          padding: 10px 20px;
+          padding: 12px 25px;
           border-radius: 5px;
-          margin-bottom: 20px;
+          margin-bottom: 25px;
           text-align: center;
+          font-size: 20px;
+          font-weight: bold;
         }
 
         .course-list {
           background: white;
-          border-radius: 8px;
+          border-radius: 10px;
           padding: 20px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
-        .course-header {
-          display: grid;
-          grid-template-columns: 1fr 100px;
-          font-weight: bold;
-          padding-bottom: 10px;
-          margin-bottom: 10px;
-          border-bottom: 2px solid #ccc;
-        }
-
+        .course-header,
         .course-item {
           display: grid;
           grid-template-columns: 1fr 100px;
@@ -109,14 +97,29 @@ export default function MyCourses() {
           border-bottom: 1px solid #eee;
         }
 
+        .course-header {
+          font-weight: 600;
+          border-bottom: 2px solid #ccc;
+        }
+
         .course-item:last-child {
           border-bottom: none;
+        }
+
+        .course-item {
+          text-decoration: none;
+          color: #333;
+          transition: background 0.2s;
+        }
+
+        .course-item:hover {
+          background-color: #f0f0f0;
         }
 
         .course-info {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 12px;
         }
 
         .course-title {
@@ -124,21 +127,37 @@ export default function MyCourses() {
         }
 
         .course-info img {
-          width: 40px;
-          height: 40px;
+          width: 45px;
+          height: 45px;
           object-fit: cover;
-          border-radius: 5px;
+          border-radius: 6px;
         }
 
-        /* Responsive Styles */
+        .progress {
+          font-weight: bold;
+          color: #008080;
+        }
+
+        .status-message {
+          text-align: center;
+          font-size: 16px;
+          color: #555;
+          margin-top: 40px;
+        }
+
+        .status-message.error {
+          color: red;
+        }
+
         @media (max-width: 768px) {
           .course-header,
           .course-item {
             grid-template-columns: 1fr;
             text-align: left;
+            row-gap: 5px;
           }
 
-          .course-item span {
+          .progress {
             margin-top: 5px;
           }
         }

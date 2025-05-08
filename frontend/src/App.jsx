@@ -11,13 +11,21 @@ import AdminLayout from "./Layouts/AdminLayout";
 import TeacherLayout from "./Layouts/TeacherLayout";
 import PublicLayout from "./Layouts/PublicLayout";
 import "./css/Index.css";
-import TeacherDashboard from "./pages/Dashboard";
+import TeacherDashboard from "./pages/TeacherDashboard";
 import AddCourse from "./pages/AddCourse";
 import CourseContent from "./pages/CourseContent";
 import StudentLayout from "./Layouts/StudentLayout";
 import MyCourses from "./pages/MyCourses";
 import StudentProfile from "./pages/StudentProfile";
 import CourseDetails from "./pages/CourseDetails";
+import TeacherCourses from "./pages/TeacherCourses";
+import TeacherProfile from "./pages/TeacherProfile";
+import TeacherNotifications from "./pages/TeacherNotifications";
+import TeacherStudents from "./pages/TeacherStudents";
+import PublicCourses from "./pages/PublicCourses";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Tutors from "./pages/Tutors";
 
 export default function App() {
   return (
@@ -29,6 +37,10 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/PublicCourse" element={<PublicCourses />} />
+          <Route path="/About" element={<About />} />
+          <Route path="/Contact" element={<Contact />} />
+          <Route path="/Tutors" element={<Tutors />} />
         </Route>
 
         {/* Admin Layout */}
@@ -42,7 +54,11 @@ export default function App() {
           <Route path="dashboard" element={<TeacherDashboard />} />
           <Route path="addcourse" element={<AddCourse />} />
           <Route path="course-details" element={<CourseDetails />} />
-          <Route path="course-content" element={<CourseContent />} />
+          <Route path="TeacherCourses" element={<TeacherCourses />} />
+          <Route path="courses/:id" element={<CourseContent />} />
+          <Route path="profile" element={<TeacherProfile />} />
+          <Route path="Notifications" element={<TeacherNotifications />} />
+          <Route path="students" element={<TeacherStudents />} />
         </Route>
 
         {/* Student Layout */}
