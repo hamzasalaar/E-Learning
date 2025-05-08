@@ -7,6 +7,12 @@ const enrollInCourse = async (req, res) => {
     const { courseId } = req.params;
     const studentId = req.user.id;
 
+    const user = await User.findById(studentId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found!",})
+      }
     const course = await Course.findById(courseId);
     if (!course) {
       return res
@@ -338,7 +344,7 @@ const getStudentProfile = async (req, res) => {
   }
 };
 
-const updateStudentProfile = async (req, res) => {
+const updateUserProfile = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -433,6 +439,6 @@ module.exports = {
   deleteReview,
   updateProgress,
   getStudentProfile,
-  updateStudentProfile,
+  updateUserProfile,
   getCourseDetails,
 };

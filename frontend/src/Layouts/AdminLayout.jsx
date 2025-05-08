@@ -31,6 +31,7 @@ const AdminLayout = () => {
         <div className="sidebar-top">
           <h2>Admin Panel</h2>
           <nav>
+            <Link to="/admin">Dashboard</Link>
             <Link to="/admin/users">Manage Users</Link>
             <Link to="/admin/courses">Manage Courses</Link>
           </nav>

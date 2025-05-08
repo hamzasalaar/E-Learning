@@ -33,6 +33,7 @@ export default function App() {
 
         {/* Admin Layout */}
         <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Admin />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="courses" element={<AdminCourses />} />
         </Route>

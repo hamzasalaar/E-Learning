@@ -1,0 +1,135 @@
+.my-courses {
+  padding: 40px;
+  background-color: #f8f9fc;
+  font-family: "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+
+.heading-bar {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.heading-bar h2 {
+  color: #0ab3a3;
+  margin-bottom: 10px;
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.course-card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.course-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.card-body {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.instructor {
+  font-size: 14px;
+  color: #777;
+}
+
+.desc {
+  font-size: 14px;
+  color: #555;
+}
+
+.progress-bar-container {
+  margin-top: 10px;
+}
+
+.progress-bar {
+  background: #eee;
+  border-radius: 4px;
+  overflow: hidden;
+  height: 10px;
+}
+
+.progress {
+  height: 100%;
+  background: #0ab3a3;
+}
+
+.progress-text {
+  font-size: 12px;
+  color: #555;
+  margin-top: 4px;
+}
+
+.continue-btn {
+  margin-top: 10px;
+  background-color: #0ab3a3;
+  color: white;
+  text-align: center;
+  padding: 8px 0;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.continue-btn:hover {
+  background-color: #089c8d;
+}
+
+.center {
+  text-align: center;
+  padding: 50px;
+  font-size: 18px;
+}
+
+@media (max-width: 768px) {
+  .my-courses {
+    padding: 20px;
+  }
+}
+.controls {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+.control-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.control-group select {
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}

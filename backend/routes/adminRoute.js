@@ -4,6 +4,8 @@ const {
   deleteUser,
   updateUser,
   getCourses,
+  userInfo,
+  getAdminStats,
 } = require("../controllers/adminController");
 const { isAdmin } = require("../middleware/adminAuth");
 const {
@@ -14,6 +16,9 @@ const {
 } = require("../controllers/courseController");
 
 const AdminRoute = express.Router();
+
+AdminRoute.get("/me", isAdmin, userInfo);
+AdminRoute.get("/stats", isAdmin, getAdminStats);
 
 AdminRoute.get("/getuser", isAdmin, getUser);
 AdminRoute.post("/deleteuser/:id", isAdmin, deleteUser);

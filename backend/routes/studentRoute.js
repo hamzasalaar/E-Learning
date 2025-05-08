@@ -10,7 +10,7 @@ const {
   unenrollFromCourse,
   updateProgress,
   getStudentProfile,
-  updateStudentProfile,
+  updateUserProfile,
   getCourseDetails,
 } = require("../controllers/studentController");
 
@@ -20,7 +20,7 @@ const StudentRoute = express.Router();
 StudentRoute.use(isAuthenticated, isStudent);
 
 StudentRoute.get("/profile", getStudentProfile);
-StudentRoute.put("/profile", updateStudentProfile);
+StudentRoute.put("/profile", updateUserProfile);
 
 StudentRoute.post("/enroll/:courseId", enrollInCourse);
 StudentRoute.get("/my-courses", getEnrolledCourses);

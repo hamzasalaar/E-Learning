@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "react-hot-toast";
 import axios from "axios";
 
 const AddCourse = () => {
@@ -51,7 +52,7 @@ const AddCourse = () => {
       );
 
       if (res.status === 201) {
-        setMessage("Course added successfully!");
+        toast.success("Course added successfully!");
         setFormData({ title: "", description: "", videoUrl: "", price: 0 });
         setLectureNotes([]);
       }

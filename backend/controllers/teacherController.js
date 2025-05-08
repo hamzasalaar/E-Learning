@@ -52,7 +52,6 @@ const getTeacherCourses = async (req, res) => {
   }
 };
 
-
 const getEnrolledStudents = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -95,37 +94,71 @@ const resubmitCourse = async (req, res) => {
     }
 
     if (course.teacher.toString() !== req.user.id) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "You are not authorized to resubmit this course!",
-        });
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to resubmit this course!",
+      });
     }
 
     if (course.status !== "rejected") {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Only rejected courses can be resubmitted.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Only rejected courses can be resubmitted.",
+      });
     }
 
     course.status = "pending";
     course.rejectionReason = null;
 
     await course.save();
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Course resubmitted successfully!",
-        course,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Course resubmitted successfully!",
+      course,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-module.exports = { getEnrolledStudents, getTeacherCourses, resubmitCourse };
+const getTeacherProfile = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    const teacher = await User.findById(req.user.id);
+    if (!teacher) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Teacher not found!" });
+    }
+
+    // Only update fields if provided
+    if (name) teacher.name = name;
+    if (email) teacher.email = email;
+    if (password) {
+      const bcrypt = require("bcryptjs");
+      const salt = await bcrypt.genSalt(10);
+      teacher.password = await bcrypt.hash(password, salt);
+    }
+
+    await teacher.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully!",
+      teacher: {
+        id: teacher._id,
+        name: teacher.name,
+        email: teacher.email,
+        role: teacher.role,
+      },
+    });
+  } catch (error) {}
+};
+
+module.exports = {
+  getEnrolledStudents,
+  getTeacherCourses,
+  resubmitCourse,
+  getTeacherProfile,
+};

@@ -10,12 +10,16 @@ const {
 const {
   getEnrolledStudents,
   getTeacherCourses,
+  getTeacherProfile,
 } = require("../controllers/teacherController");
+const { updateUserProfile } = require("../controllers/studentController");
 
 const TeacherRoute = express.Router();
 
 TeacherRoute.use(isAuthenticated); // Apply authentication middleware to all routes
 
+TeacherRoute.get("/profile", getTeacherProfile);
+TeacherRoute.put("/update-profile", updateUserProfile);
 TeacherRoute.get("/courses", isTeacher, getTeacherCourses);
 TeacherRoute.post(
   "/create-course",

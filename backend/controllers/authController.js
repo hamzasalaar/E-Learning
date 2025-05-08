@@ -61,7 +61,7 @@ const Login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await UserModel.findOne({ email });
+    const user = await UserModel.findOne({ email, status: "active" });
     if (!user) {
       return res
         .status(401)

@@ -8,6 +8,7 @@ const AuthRoute = require("./routes/authRoute");
 const AdminRoute = require("./routes/adminRoute");
 const TeacherRoute = require("./routes/teacherRoute");
 const StudentRoute = require("./routes/studentRoute");
+const PublicRoute = require("./routes/publicRoute");
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use(
 );
 app.use(cookieparser());
 
+app.use("/api/public", PublicRoute);
 app.use("/api/auth", AuthRoute);
 app.use("/api/admin", AdminRoute);
 app.use("/api/teacher", TeacherRoute);

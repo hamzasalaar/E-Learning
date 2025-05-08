@@ -197,8 +197,9 @@ const getCourseStats = async (req, res) => {
     const { courseId } = req.params;
 
     const course = await Course.findById(courseId)
-      .populate("reviews")
-      .populate("studentsEnrolled");
+      .populate("reviews.user", "name email") // populate review authors
+      .populate("studentsEnrolled", "name email") // optional if needed
+      .populate("teacher", "name email"); // optional if needed
 
     if (!course) {
       return res
@@ -206,18 +207,32 @@ const getCourseStats = async (req, res) => {
         .json({ success: false, message: "Course not found!" });
     }
 
-    // Calculate stats like average rating, number of enrolled students, etc.
-    const totalStudents = course.studentsEnrolled.length;
+    // Avoid divide by 0 error
+    const totalReviews = course.reviews.length;
     const averageRating =
-      course.reviews.reduce((acc, review) => acc + review.rating, 0) /
-      course.reviews.length;
+      totalReviews > 0
+        ? course.reviews.reduce((acc, review) => acc + review.rating, 0) /
+          totalReviews
+        : 0;
+
+    const formattedReviews = course.reviews.map((review) => ({
+      _id: review._id,
+      studentName: review.user?.name || "Anonymous",
+      studentEmail: review.user?.email || "",
+      rating: review.rating,
+      comment: review.comment,
+      createdAt: review.createdAt,
+    }));
 
     res.status(200).json({
       success: true,
       courseId: course._id,
-      totalStudents,
+      title: course.title,
+      totalStudents: course.studentsEnrolled.length,
+      price: course.price,
       averageRating,
-      numberOfReviews: course.reviews.length,
+      numberOfReviews: totalReviews,
+      reviews: formattedReviews,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

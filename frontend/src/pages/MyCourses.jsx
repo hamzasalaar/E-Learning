@@ -1,26 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import "../css/MyCourses.css";
 
 export default function MyCourses() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filter, setFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("title");
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         const res = await axios.get(
           "http://localhost:3000/api/student/my-courses",
-          {
-            withCredentials: true,
-          }
+          { withCredentials: true }
         );
-        console.log("API Response:", res.data); // Debugging log
-        setCourses(res.data.coursesWithProgress || []); // Use coursesWithProgress
-        setLoading(false);
+        setCourses(res.data.coursesWithProgress || []);
       } catch {
         setError("Failed to load courses");
+      } finally {
         setLoading(false);
       }
     };
@@ -28,121 +28,92 @@ export default function MyCourses() {
     fetchCourses();
   }, []);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  // Filter and sort logic
+  const filteredCourses = courses
+    .filter((course) => {
+      if (filter === "completed") return course.progress.percentage === 100;
+      if (filter === "inprogress") return course.progress.percentage < 100;
+      return true; // 'all'
+    })
+    .sort((a, b) => {
+      if (sortBy === "title") return a.title.localeCompare(b.title);
+      if (sortBy === "progress")
+        return b.progress.percentage - a.progress.percentage;
+      return 0;
+    });
 
-  if (error) {
-    return <div>{error}</div>;
-  }
+  if (loading) return <div className="center">Loading...</div>;
+  if (error) return <div className="center">{error}</div>;
 
   return (
     <div className="my-courses">
-      <div className="simple-bar">
-        <h2>My Courses</h2>
+      <div className="heading-bar">
+        <h2>My Enrolled Courses</h2>
+        <p>You can resume any course you're enrolled in.</p>
       </div>
 
-      <div className="course-list">
-        <div className="course-header">
-          <span>Name</span>
-          <span>Progress</span>
+      <div className="controls">
+        <div className="control-group">
+          <label>Filter:</label>
+          <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+            <option value="all">All</option>
+            <option value="inprogress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
         </div>
 
-        {courses.length > 0 ? (
-          courses.map((course) => (
-            <Link
-              to={`/student/course-content/${course._id}`} // Navigate to course content
-              className="course-item"
-              key={course._id}
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              <div className="course-info">
-                <img src={course.image} alt={course.title} />
-                <span className="course-title">{course.title}</span>
-              </div>
-              <span>{course.progress.percentage}%</span>
-            </Link>
-          ))
-        ) : (
-          <div>No courses found</div>
-        )}
+        <div className="control-group">
+          <label>Sort by:</label>
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <option value="title">Title (A-Z)</option>
+            <option value="progress">Progress (%)</option>
+          </select>
+        </div>
       </div>
 
-      <style>{`
-        .my-courses {
-          font-family: sans-serif;
-          padding: 30px;
-          background: #f8f9fc;
-          min-height: 100vh;
-        }
+      <div className="courses-grid">
+        {filteredCourses.length > 0 ? (
+          filteredCourses.map((course) => (
+            <div key={course._id} className="course-card">
+              <img
+                src={course.image || "/default-course.jpg"}
+                alt={course.title}
+                className="course-img"
+              />
+              <div className="card-body">
+                <h3 className="title">{course.title}</h3>
+                <p className="instructor">
+                  By {course.teacher?.name || "Instructor"}
+                </p>
+                <p className="desc">
+                  {course.description?.slice(0, 80) || "No description"}...
+                </p>
 
-        .simple-bar {
-          background-color: #0ab3a3;
-          color: white;
-          padding: 10px 20px;
-          border-radius: 5px;
-          margin-bottom: 20px;
-          text-align: center;
-        }
+                <div className="progress-bar-container">
+                  <div className="progress-bar">
+                    <div
+                      className="progress"
+                      style={{ width: `${course.progress.percentage}%` }}
+                    ></div>
+                  </div>
+                  <span className="progress-text">
+                    {course.progress.percentage}% complete
+                  </span>
+                </div>
 
-        .course-list {
-          background: white;
-          border-radius: 8px;
-          padding: 20px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .course-header {
-          display: grid;
-          grid-template-columns: 1fr 100px;
-          font-weight: bold;
-          padding-bottom: 10px;
-          margin-bottom: 10px;
-          border-bottom: 2px solid #ccc;
-        }
-
-        .course-item {
-          display: grid;
-          grid-template-columns: 1fr 100px;
-          align-items: center;
-          padding: 12px 0;
-          border-bottom: 1px solid #eee;
-        }
-
-        .course-item:last-child {
-          border-bottom: none;
-        }
-
-        .course-info {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .course-title {
-          font-weight: 500;
-        }
-
-        .course-info img {
-          width: 40px;
-          height: 40px;
-          object-fit: cover;
-          border-radius: 5px;
-        }
-
-        /* Responsive Styles */
-        @media (max-width: 768px) {
-          .course-header,
-          .course-item {
-            grid-template-columns: 1fr;
-            text-align: left;
-          }
-
-          .course-item span {
-            margin-top: 5px;
-          }
-        }
-      `}</style>
+                <Link
+                  to={`/student/course-content/${course._id}`}
+                  className="continue-btn"
+                >
+                  Continue Learning
+                </Link>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p>No courses enrolled yet.</p>
+        )}
+      </div>
     </div>
   );
 }
