@@ -1,9 +1,8 @@
 import React from "react";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import { useDispatch } from "react-redux";
-import { Logout } from "../redux/AuthSlice"; // Import the Logout action
+import { Logout } from "../redux/AuthSlice";
 import {
   FaUser,
   FaDollarSign,
@@ -11,11 +10,15 @@ import {
   FaCog,
   FaMoneyCheckAlt,
   FaChalkboardTeacher,
+  FaHome,
+  FaBook,
 } from "react-icons/fa";
 
-export default function TeacherSidebar({ onLogout }) {
+export default function TeacherSidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.Auth.user);
 
   const handleLogout = async () => {
     try {
@@ -32,49 +35,52 @@ export default function TeacherSidebar({ onLogout }) {
       console.error("Logout failed:", err);
     }
   };
-  // Access user data from Redux store
-  const user = useSelector((state) => state.Auth.user); // Access the user field from the Auth slice
-  // console.log(user); // Log the user data for debugging
+
+  const isActive = (path) => location.pathname.startsWith(path);
 
   return (
     <aside className="sidebar">
-      {/* User Profile Section */}
+      {/* User Info */}
       <div className="user-profile-top">
         <div className="user-info">
           <img
-            src={user?.profilePicture || "https://via.placeholder.com/60"} // Use user's profile picture or a placeholder
+            src={user?.profilePicture || "https://via.placeholder.com/60"}
             alt="Profile"
             className="profile-pic"
           />
-          <span className="user-name">{user?.name || "Guest"}</span>{" "}
-          {/* Display user's name */}
+          <span className="user-name">{user?.name || "Guest"}</span>
         </div>
-        <button className="update-profile-button">Update Profile</button>
+        <Link to="/teacher/profile" className="update-profile-button">
+          Update Profile
+        </Link>
       </div>
 
-      {/* Navigation Menu */}
+      {/* Navigation */}
       <nav className="menu">
-        <a href="/teacher/addcourse" className="menu-item">
+        <Link to="/teacher/dashboard" className={`menu-item ${isActive("/teacher/dashboard") ? "active" : ""}`}>
+          <FaHome /> Dashboard
+        </Link>
+        <Link to="/teacher/addcourse" className={`menu-item ${isActive("/teacher/addcourse") ? "active" : ""}`}>
           <FaChalkboardTeacher /> Add Course
-        </a>
-        <a href="#" className="menu-item">
+        </Link>
+        <Link to="/teacher/TeacherCourses" className={`menu-item ${isActive("/teacher/TeacherCourses") ? "active" : ""}`}>
+          <FaBook /> My Courses
+        </Link>
+        <Link to="/teacher/students" className="menu-item">
           <FaUser /> Students
-        </a>
-        <a href="#" className="menu-item">
+        </Link>
+        <Link to="/teacher/notifications" className="menu-item">
           <FaDollarSign /> Notifications
-        </a>
-        <a href="#" className="menu-item">
-          <FaEnvelope /> Emails
-        </a>
-        <a href="#" className="menu-item">
+        </Link>
+        <Link to="#/teacher/settings" className="menu-item">
           <FaCog /> Settings
-        </a>
-        <a href="#" className="menu-item">
+        </Link>
+        <Link to="#/teacher/payouts" className="menu-item">
           <FaMoneyCheckAlt /> Payout Details
-        </a>
+        </Link>
       </nav>
 
-      {/* Logout Button */}
+      {/* Logout */}
       <div className="logout-section">
         <button className="logout-button" onClick={handleLogout}>
           Logout
@@ -128,6 +134,7 @@ export default function TeacherSidebar({ onLogout }) {
           border-radius: 4px;
           cursor: pointer;
           font-size: 14px;
+          text-decoration: none;
         }
 
         .update-profile-button:hover {
@@ -148,10 +155,17 @@ export default function TeacherSidebar({ onLogout }) {
           color: white;
           text-decoration: none;
           font-size: 16px;
+          padding: 6px 10px;
+          border-radius: 6px;
         }
 
         .menu-item:hover {
-          text-decoration: underline;
+          background-color: #2d2f45;
+        }
+
+        .menu-item.active {
+          background-color: #0ab3a3;
+          font-weight: bold;
         }
 
         .logout-section {
@@ -173,7 +187,6 @@ export default function TeacherSidebar({ onLogout }) {
           background-color: #c82333;
         }
 
-        /* Responsive Styles */
         @media (max-width: 768px) {
           .sidebar {
             width: 100%;
@@ -181,6 +194,7 @@ export default function TeacherSidebar({ onLogout }) {
             overflow-x: auto;
             padding: 10px;
             justify-content: space-around;
+            height: auto;
           }
 
           .user-profile-top {
@@ -189,11 +203,8 @@ export default function TeacherSidebar({ onLogout }) {
 
           .menu {
             flex-direction: row;
+            flex-wrap: wrap;
             gap: 10px;
-          }
-
-          .menu-item {
-            font-size: 14px;
           }
 
           .logout-section {

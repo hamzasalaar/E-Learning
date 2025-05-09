@@ -1,13 +1,17 @@
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; // ✅ Add navigation hook
 
 const AddCourse = () => {
+  const navigate = useNavigate(); // ✅ Initialize navigate
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     videoUrl: "",
     price: 0,
+    imageUrl: "",
   });
 
   const [lectureNotes, setLectureNotes] = useState([]);
@@ -34,6 +38,7 @@ const AddCourse = () => {
       data.append("description", formData.description);
       data.append("videoUrl", formData.videoUrl);
       data.append("price", formData.price);
+      data.append("imageUrl", formData.imageUrl);
 
       for (let i = 0; i < lectureNotes.length; i++) {
         data.append("lectureNotes", lectureNotes[i]);
@@ -46,7 +51,7 @@ const AddCourse = () => {
           withCredentials: true,
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // if using JWT
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
@@ -87,6 +92,29 @@ const AddCourse = () => {
             onChange={handleChange}
             required
           />
+        </label>
+
+        <label>
+          Course Image (PostImages URL):
+          <input
+            type="url"
+            name="imageUrl"
+            value={formData.imageUrl}
+            onChange={handleChange}
+            placeholder="https://postimg.cc/XXXXXX"
+            required
+          />
+          <small className="hint">
+            Upload your image to{" "}
+            <a
+              href="https://postimages.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              PostImages.org
+            </a>{" "}
+            and paste the link here
+          </small>
         </label>
 
         <label>
@@ -187,7 +215,23 @@ const AddCourse = () => {
         .message {
           margin-top: 15px;
           font-size: 14px;
+          color: #d9534f;
+        }
+
+        .hint {
+          display: block;
+          margin-top: 5px;
+          font-size: 12px;
+          color: #666;
+        }
+
+        .hint a {
           color: #008080;
+          text-decoration: none;
+        }
+
+        .hint a:hover {
+          text-decoration: underline;
         }
 
         @media (max-width: 600px) {

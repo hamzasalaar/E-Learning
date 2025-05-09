@@ -1,30 +1,10 @@
-import { Link, Outlet } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import axios from "axios";
-import { Logout } from "../redux/AuthSlice"; // Import the Logout action
-import "../css/AdminLayout.css"; // Import your CSS file for styling
+// src/layouts/AdminLayout.js
+import React from "react";
+import { Outlet } from "react-router-dom";
+import AdminPanel from "../components/AdminPanel";
+import "../css/AdminLayout.css"; // Keep your existing styling
 
 const AdminLayout = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-  const handleLogout = async () => {
-    try {
-      const res = await axios.post(
-        "http://localhost:3000/api/auth/logout",
-        {},
-        { withCredentials: true }
-      );
-      if (res.status === 200) {
-        dispatch(Logout());
-        navigate("/");
-      }
-    } catch (err) {
-      console.error("Logout failed:", err);
-    }
-  };
-
   return (
     <div className="admin-layout">
       <aside className="admin-sidebar">

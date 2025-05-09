@@ -1,37 +1,30 @@
 const Course = require("../models/courseModel");
 const User = require("../models/userModel");
 
+// Get all courses for the logged-in teacher
 const getTeacherCourses = async (req, res) => {
   try {
     if (req.user.role !== "teacher") {
-      return res
-        .status(403)
-        .json({ success: false, message: "Access denied. Teachers only." });
+      return res.status(403).json({ success: false, message: "Access denied. Teachers only." });
     }
 
     const teacherId = req.user.id;
-
-    // Pagination
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
     const skip = (page - 1) * limit;
 
-    // Search
     const search = req.query.search || "";
-    const searchRegex = new RegExp(search, "i"); // case-insensitive
+    const searchRegex = new RegExp(search, "i");
 
-    // Sort (default: newest first)
-    const sortBy = req.query.sort || "createdAt"; // e.g., "sales" or "enrollments"
+    const sortBy = req.query.sort || "createdAt";
     const sortOrder = req.query.order === "asc" ? 1 : -1;
 
-    // Build filter
     const filter = {
       teacher: teacherId,
       title: { $regex: searchRegex },
     };
 
     const totalCourses = await Course.countDocuments(filter);
-
     const courses = await Course.find(filter)
       .sort({ [sortBy]: sortOrder })
       .skip(skip)
@@ -57,20 +50,14 @@ const getEnrolledStudents = async (req, res) => {
     const { courseId } = req.params;
     const teacherId = req.user.id;
 
-    const course = await Course.findById(courseId)
-      .populate("studentsEnrolled", "name email")
-      .exec();
+    const course = await Course.findById(courseId).populate("studentsEnrolled", "name email");
 
     if (!course) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Course not found" });
+      return res.status(404).json({ success: false, message: "Course not found" });
     }
 
     if (course.teacher.toString() !== teacherId) {
-      return res
-        .status(403)
-        .json({ success: false, message: "Unauthorized access" });
+      return res.status(403).json({ success: false, message: "Unauthorized access" });
     }
 
     res.status(200).json({
@@ -82,15 +69,14 @@ const getEnrolledStudents = async (req, res) => {
   }
 };
 
+// Resubmit a rejected course
 const resubmitCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
 
     const course = await Course.findById(courseId);
     if (!course) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Course not found!" });
+      return res.status(404).json({ success: false, message: "Course not found!" });
     }
 
     if (course.teacher.toString() !== req.user.id) {
@@ -121,6 +107,33 @@ const resubmitCourse = async (req, res) => {
   }
 };
 
+// ✅ NEW: Get single course details
+const getSingleCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    const course = await Course.findById(courseId).populate("studentsEnrolled", "name email");
+
+    if (!course) {
+      return res.status(404).json({ success: false, message: "Course not found." });
+    }
+
+    if (course.teacher.toString() !== req.user.id) {
+      return res.status(403).json({ success: false, message: "Unauthorized access." });
+    }
+
+    res.status(200).json({ success: true, course });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = {
+  getTeacherCourses,
+  getEnrolledStudents,
+  resubmitCourse,
+  getSingleCourse, // ✅ include here
+};
 const getTeacherProfile = async (req, res) => {
   try {
     const { name, email, password } = req.body;
