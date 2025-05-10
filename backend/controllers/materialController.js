@@ -1,14 +1,12 @@
+// controllers/materialController.js
 const Material = require("../models/materialModel");
 const Course = require("../models/courseModel");
 
 const getMaterialsForCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
-
     const course = await Course.findById(courseId);
-    if (!course) {
-      return res.status(404).json({ success: false, message: "Course not found" });
-    }
+    if (!course) return res.status(404).json({ success: false, message: "Course not found" });
 
     if (course.teacher.toString() !== req.user.id) {
       return res.status(403).json({ success: false, message: "Unauthorized access" });
@@ -22,5 +20,5 @@ const getMaterialsForCourse = async (req, res) => {
 };
 
 module.exports = {
-  getMaterialsForCourse,
+  getMaterialsForCourse, // ✅ Make sure this name matches the import
 };

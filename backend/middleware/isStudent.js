@@ -1,12 +1,20 @@
 const isStudent = (req, res, next) => {
-  // Check if the user is authenticated and has the 'student' role
+  // Ensure req.user exists (set by isAuthenticated middleware)
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized. Please login first.",
+    });
+  }
+
   if (req.user.role !== "student") {
     return res.status(403).json({
       success: false,
-      message: "Access denied. You must be a student to access this resource.",
+      message: "Access denied. Students only.",
     });
   }
-  next(); // If the user is a student, allow the request to proceed
-}
+
+  next(); // User is a student
+};
 
 module.exports = { isStudent };
