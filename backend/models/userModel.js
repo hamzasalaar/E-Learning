@@ -20,14 +20,14 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    imageUrl: {
+      type: String,
+      default: "", // Optional: fallback to a default image path
+    },
     failedAttempts: {
       type: Number,
       default: 0,
     },
-    // lockUntil: {
-    //   type: Date,
-    //   default: null,
-    // },
   },
   {
     timestamps: true,

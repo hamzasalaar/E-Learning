@@ -1,4 +1,3 @@
-// routes/teacherRoute.js
 const express = require("express");
 const { isAuthenticated } = require("../middleware/userAuth");
 const { isTeacher } = require("../middleware/isTeacher");
@@ -15,11 +14,13 @@ const {
   getEnrolledStudents,
   resubmitCourse,
   getSingleCourse,
+  getTeacherProfile,
+  updateTeacherProfile,
 } = require("../controllers/teacherController");
 
 const {
   getMaterialsForCourse,
-} = require("../controllers/materialController"); // ✅ double-check path and export name
+} = require("../controllers/materialController");
 
 const {
   getNotifications,
@@ -29,8 +30,10 @@ const {
 
 const TeacherRoute = express.Router();
 
+// ✅ Protect all routes: only authenticated teachers can access
 TeacherRoute.use(isAuthenticated, isTeacher);
 
+// ✅ Course management
 TeacherRoute.get("/courses", getTeacherCourses);
 TeacherRoute.post("/create-course", upload.array("lectureNotes", 10), createCourse);
 TeacherRoute.put("/update-course/:courseId", upload.array("lectureNotes", 10), updateCourse);
@@ -38,10 +41,15 @@ TeacherRoute.delete("/delete/:courseId", deleteCourse);
 TeacherRoute.get("/courses/:courseId/enrollments", getEnrolledStudents);
 TeacherRoute.post("/courses/:courseId/resubmit", resubmitCourse);
 TeacherRoute.get("/courses/:courseId", getSingleCourse);
-TeacherRoute.get("/courses/:courseId/materials", getMaterialsForCourse); // 🟩 This should not be undefined
+TeacherRoute.get("/courses/:courseId/materials", getMaterialsForCourse);
 
+// ✅ Notifications
 TeacherRoute.get("/notifications", getNotifications);
 TeacherRoute.put("/notifications/:id/read", markAsRead);
 TeacherRoute.put("/notifications/read-all", markAllAsRead);
+
+// ✅ Profile routes
+TeacherRoute.get("/profile", getTeacherProfile);
+TeacherRoute.put("/profile", updateTeacherProfile);
 
 module.exports = TeacherRoute;

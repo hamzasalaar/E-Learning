@@ -129,9 +129,61 @@ const getSingleCourse = async (req, res) => {
   }
 };
 
+// Get the logged-in teacher's profile
+const getTeacherProfile = async (req, res) => {
+  try {
+    if (req.user.role !== "teacher") {
+      return res.status(403).json({ success: false, message: "Access denied. Teachers only." });
+    }
+
+    const teacher = await User.findById(req.user.id).select("-password -__v");
+
+    if (!teacher) {
+      return res.status(404).json({ success: false, message: "Teacher not found" });
+    }
+
+    res.status(200).json({ success: true, teacher });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Update the teacher's profile
+const updateTeacherProfile = async (req, res) => {
+  try {
+    if (req.user.role !== "teacher") {
+      return res.status(403).json({ success: false, message: "Access denied. Teachers only." });
+    }
+
+    const { name, profilePicture } = req.body;
+
+    const teacher = await User.findById(req.user.id);
+    if (!teacher) {
+      return res.status(404).json({ success: false, message: "Teacher not found" });
+    }
+
+    if (name) teacher.name = name;
+    if (profilePicture) teacher.imageUrl = profilePicture;
+
+    await teacher.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      teacher,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
 module.exports = {
   getTeacherCourses,
   getEnrolledStudents,
   resubmitCourse,
   getSingleCourse, // ✅ include here
+  getTeacherProfile,       // ✅ now added
+  updateTeacherProfile     // ✅ now added
 };

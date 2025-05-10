@@ -12,6 +12,10 @@ const AdminCourses = () => {
   const [courseToDelete, setCourseToDelete] = useState(null);
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [courseStats, setCourseStats] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [coursesPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -75,7 +79,7 @@ const AdminCourses = () => {
 
   const handleDelete = async (courseId) => {
     try {
-      await axios.put(
+      await axios.delete(
         `http://localhost:3000/api/admin/course/delete/${courseId}`,
         { withCredentials: true }
       );
@@ -101,6 +105,28 @@ const AdminCourses = () => {
     }
   };
 
+  const filteredCourses = courses
+    .filter((course) => {
+      const teacherMatch =
+        course.teacher?.name
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        course.teacher?.email
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase());
+      const titleMatch = course.title
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      return teacherMatch || titleMatch;
+    })
+    .filter(
+      (course) => statusFilter === "all" || course.status === statusFilter
+    );
+
+  useEffect(() => {
+    setCurrentPage(1); // Reset to first page when search or filter changes
+  }, [searchQuery, statusFilter]);
+
   if (loading) return <p>Loading courses...</p>;
 
   return (
@@ -109,6 +135,27 @@ const AdminCourses = () => {
 
       {courses?.length > 0 ? (
         <div className="table-container">
+          <div className="search-filter-bar">
+            <input
+              type="text"
+              placeholder="Search by title or teacher..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="filter-select"
+            >
+              <option value="all">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+
           <table className="user-table">
             <thead>
               <tr>
@@ -116,60 +163,117 @@ const AdminCourses = () => {
                 <th>Teacher</th>
                 <th>Status</th>
                 <th>Rejection Reason</th>
+                <th>Enrolled Students</th>
                 <th>Update Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {courses.map((course) => (
-                <tr key={course._id}>
-                  <td>{course.title}</td>
-                  <td>
-                    {course.teacher?.name || "N/A"} (
-                    {course.teacher?.email || "N/A"})
-                  </td>
-                  <td>{course.status}</td>
-                  <td>
-                    {course.status === "rejected"
-                      ? course.rejectionReason
-                      : "-"}
-                  </td>
-                  <td>
-                    <select
-                      value={course.status}
-                      onChange={(e) =>
-                        handleStatusChange(course._id, e.target.value)
-                      }
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="approved">Approve</option>
-                      <option value="rejected">Reject</option>
-                    </select>
-                  </td>
-                  <td>
-                    {(course.status === "approved" ||
-                      course.status === "rejected") && (
-                      <button
-                        onClick={() => {
-                          setShowDeleteConfirmation(true);
-                          setCourseToDelete(course._id);
-                        }}
-                        style={deleteButtonStyle}
+              {filteredCourses
+                .slice(
+                  (currentPage - 1) * coursesPerPage,
+                  currentPage * coursesPerPage
+                )
+                .map((course) => (
+                  <tr key={course._id}>
+                    <td>{course.title}</td>
+                    <td>
+                      {course.teacher?.name || "N/A"} (
+                      {course.teacher?.email || "N/A"})
+                    </td>
+                    <td>{course.status}</td>
+                    <td>
+                      {course.status === "rejected"
+                        ? course.rejectionReason
+                        : "-"}
+                    </td>
+                    <td>{course.studentsEnrolled.length || 0}</td>
+                    <td>
+                      <select
+                        value={course.status}
+                        onChange={(e) =>
+                          handleStatusChange(course._id, e.target.value)
+                        }
                       >
-                        Delete
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approve</option>
+                        <option value="rejected">Reject</option>
+                      </select>
+                    </td>
+                    <td>
+                      {(course.status === "approved" ||
+                        course.status === "rejected") && (
+                        <button
+                          onClick={() => {
+                            setShowDeleteConfirmation(true);
+                            setCourseToDelete(course._id);
+                          }}
+                          style={deleteButtonStyle}
+                        >
+                          Delete
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleViewStats(course._id)}
+                        style={viewStatsButtonStyle}
+                      >
+                        View Stats
                       </button>
-                    )}
-                    <button
-                      onClick={() => handleViewStats(course._id)}
-                      style={viewStatsButtonStyle}
-                    >
-                      View Stats
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
+          <div className="pagination-container">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="pagination-btn"
+            >
+              ◀ Previous
+            </button>
+
+            {Array.from({
+              length: Math.ceil(
+                filteredCourses.filter((user) => user.status !== "deleted")
+                  .length / coursesPerPage
+              ),
+            }).map((_, index) => (
+              <button
+                key={index}
+                className={`pagination-btn ${
+                  currentPage === index + 1 ? "active" : ""
+                }`}
+                onClick={() => setCurrentPage(index + 1)}
+              >
+                {index + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={() =>
+                setCurrentPage((prev) =>
+                  Math.min(
+                    prev + 1,
+                    Math.ceil(
+                      courses.filter((user) => user.status !== "deleted")
+                        .length / coursesPerPage
+                    )
+                  )
+                )
+              }
+              disabled={
+                currentPage ===
+                Math.ceil(
+                  courses.filter((user) => user.status !== "deleted").length /
+                    coursesPerPage
+                )
+              }
+              className="pagination-btn"
+            >
+              Next ▶
+            </button>
+          </div>
         </div>
       ) : (
         <p className="no-users">No courses found.</p>
@@ -259,7 +363,7 @@ const AdminCourses = () => {
           <div style={statsModalStyle}>
             <h3>Course Stats</h3>
             <p>
-              <strong>Total Students:</strong> {courseStats.totalStudents}
+              <strong>Total Students:</strong> {courseStats.totalStudents || 0}
             </p>
             <p>
               <strong>Average Rating:</strong>{" "}
@@ -267,6 +371,9 @@ const AdminCourses = () => {
               courseStats.averageRating !== undefined
                 ? courseStats.averageRating.toFixed(2)
                 : "N/A"}
+            </p>
+            <p>
+              <strong>Price:</strong> {courseStats.price}
             </p>
             <p>
               <strong>Number of Reviews:</strong> {courseStats.numberOfReviews}

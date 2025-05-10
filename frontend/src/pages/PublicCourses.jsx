@@ -7,6 +7,7 @@ export default function PublicCourses() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("all");
   const [filteredCourses, setFilteredCourses] = useState([]);
 
   useEffect(() => {
@@ -28,31 +29,41 @@ export default function PublicCourses() {
   }, []);
 
   useEffect(() => {
-    const filtered = courses.filter(course =>
-      course.title.toLowerCase().includes(search.toLowerCase())
+    let result = courses.filter(course =>
+      course.title.toLowerCase().includes(search.toLowerCase()) ||
+      course.description.toLowerCase().includes(search.toLowerCase())
     );
-    setFilteredCourses(filtered);
-  }, [search, courses]);
+
+    if (sort === "low") {
+      result.sort((a, b) => a.price - b.price);
+    } else if (sort === "high") {
+      result.sort((a, b) => b.price - a.price);
+    }
+
+    setFilteredCourses(result);
+  }, [search, sort, courses]);
 
   return (
-    <div className="teacher-courses">
+    <div className="public-courses">
       <h2>All Courses</h2>
 
-      <input
-        type="text"
-        placeholder="Search courses by title"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        style={{
-          padding: "8px 12px",
-          width: "100%",
-          maxWidth: "400px",
-          margin: "10px auto 30px",
-          display: "block",
-          border: "1px solid #ccc",
-          borderRadius: "6px"
-        }}
-      />
+      <div className="search-container">
+        <select value={sort} onChange={(e) => setSort(e.target.value)} className="sort-dropdown">
+          <option value="all">All</option>
+          <option value="low">Price: Low to High</option>
+          <option value="high">Price: High to Low</option>
+        </select>
+        <input
+          type="text"
+          placeholder="Search courses by title or description"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="search-input"
+        />
+        <button className="search-button">
+          🔍
+        </button>
+      </div>
 
       {loading ? (
         <p className="info">Loading courses...</p>
@@ -69,7 +80,15 @@ export default function PublicCourses() {
               key={course._id}
               style={{ textDecoration: "none", color: "inherit" }}
             >
-              <img src={course.imageUrl} alt={course.title} className="course-image" />
+              <img
+                src={course.imageUrl || "/default-course.jpg"}
+                alt={course.title}
+                className="course-image"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "/default-course.jpg";
+                }}
+              />
               <div className="course-content">
                 <h3>{course.title}</h3>
                 <p className="description">{course.description.slice(0, 100)}...</p>
@@ -85,7 +104,7 @@ export default function PublicCourses() {
       )}
 
       <style>{`
-        .teacher-courses {
+        .public-courses {
           max-width: 1100px;
           margin: 0 auto;
           padding: 30px 20px;
@@ -96,6 +115,40 @@ export default function PublicCourses() {
           text-align: center;
           color: #006666;
           margin-bottom: 25px;
+        }
+
+        .search-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          max-width: 600px;
+          margin: 0 auto 30px auto;
+          border: 2px solid #f90;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+
+        .sort-dropdown {
+          padding: 10px;
+          border: none;
+          background-color: #f2f2f2;
+          font-size: 14px;
+        }
+
+        .search-input {
+          flex: 1;
+          padding: 10px;
+          border: none;
+          outline: none;
+          font-size: 15px;
+        }
+
+        .search-button {
+          background-color: #febd69;
+          border: none;
+          padding: 10px 16px;
+          cursor: pointer;
+          font-size: 16px;
         }
 
         .info, .error {
@@ -157,12 +210,21 @@ export default function PublicCourses() {
         }
 
         @media (max-width: 768px) {
-          .course-card {
+          .search-container {
             flex-direction: column;
+            align-items: stretch;
           }
 
-          .course-image {
-            height: 150px;
+          .sort-dropdown,
+          .search-input,
+          .search-button {
+            width: 100%;
+            box-sizing: border-box;
+          }
+
+          .search-input {
+            border-top: 1px solid #ccc;
+            border-bottom: 1px solid #ccc;
           }
         }
       `}</style>
