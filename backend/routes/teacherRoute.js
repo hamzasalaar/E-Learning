@@ -1,7 +1,8 @@
 const express = require("express");
-const { isTeacher } = require("../middleware/isTeacher");
 const { isAuthenticated } = require("../middleware/userAuth");
+const { isTeacher } = require("../middleware/isTeacher");
 const upload = require("../utils/multerConfig");
+const { checkFileSize } = require("../middleware/fileSize"); // ✅ correct import
 
 const {
   createCourse,
@@ -13,47 +14,68 @@ const {
   getTeacherCourses,
   getEnrolledStudents,
   resubmitCourse,
-  getSingleCourse, // ✅ correct import
+  getSingleCourse,
   getTeacherProfile,
+  updateTeacherProfile,
 } = require("../controllers/teacherController");
 
 const {
-  getMaterialsForCourse, // ✅ materials import
+  getMaterialsForCourse,
+  addMaterial,
+  updateMaterial,
+  deleteMaterial,
 } = require("../controllers/materialController");
 
-// 🔐 For Notifications system
 const {
   getNotifications,
   markAsRead,
   markAllAsRead,
 } = require("../controllers/notificationController");
 const { updateUserProfile } = require("../controllers/studentController");
+const uploadImage = require("../utils/uploadImage");
 
 const TeacherRoute = express.Router();
 
 // 🔐 Middleware: apply to all
-TeacherRoute.use(isAuthenticated);
+TeacherRoute.use(isAuthenticated, isTeacher);
 
 // ✅ Course routes
 TeacherRoute.get("/profile", getTeacherProfile);
 TeacherRoute.put("/update-profile", updateUserProfile);
-TeacherRoute.get("/courses", isTeacher, getTeacherCourses);
-TeacherRoute.post("/create-course", isTeacher, upload.array("lectureNotes", 10), createCourse);
-TeacherRoute.put("/update-course/:courseId", isTeacher, upload.array("lectureNotes", 10), updateCourse);
-TeacherRoute.delete("/delete/:courseId", isTeacher, deleteCourse);
+TeacherRoute.get("/courses", getTeacherCourses);
+TeacherRoute.post("/create-course", uploadImage.single("image"), createCourse);
+TeacherRoute.put(
+  "/update-course/:courseId",
+  uploadImage.single("image"),
+  updateCourse
+);
+TeacherRoute.delete("/delete/:courseId", deleteCourse);
 
 // ✅ Student + resubmit
-TeacherRoute.get("/courses/:courseId/enrollments", isTeacher, getEnrolledStudents);
-TeacherRoute.post("/courses/:courseId/resubmit", isTeacher, resubmitCourse);
+TeacherRoute.get("/courses/:courseId/enrollments", getEnrolledStudents);
+TeacherRoute.post("/courses/:courseId/resubmit", resubmitCourse);
 
 // ✅ NEW: Single course + materials
-TeacherRoute.get("/courses/:courseId", isTeacher, getSingleCourse);
-TeacherRoute.get("/courses/:courseId/materials", isTeacher, getMaterialsForCourse);
+TeacherRoute.get("/courses/:courseId", getSingleCourse);
+TeacherRoute.get("/courses/:courseId/materials", getMaterialsForCourse);
+TeacherRoute.post(
+  "/courses/add-material/:courseId",
+  checkFileSize,
+  upload.array("files", 10),
+  addMaterial
+);
+TeacherRoute.put(
+  "/courses/:courseId/materials/:materialId",
+  checkFileSize,
+  upload.array("files", 10),
+  updateMaterial
+);
+TeacherRoute.delete("/courses/:courseId/materials/:materialId", deleteMaterial);
 
 // ✅ Routes for Notifications
 // must be after isAuthenticated middleware
-TeacherRoute.get("/notifications", isTeacher, getNotifications);
-TeacherRoute.put("/notifications/:id/read", isTeacher, markAsRead);
-TeacherRoute.put("/notifications/read-all", isTeacher, markAllAsRead);
+// TeacherRoute.get("/notifications", isTeacher, getNotifications);
+// TeacherRoute.put("/notifications/:id/read", isTeacher, markAsRead);
+// TeacherRoute.put("/notifications/read-all", isTeacher, markAllAsRead);
 
 module.exports = TeacherRoute;

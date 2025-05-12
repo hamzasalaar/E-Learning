@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useDispatch } from "react-redux";
 import { toast } from "react-hot-toast";
-import { updateUser } from "../redux/AuthSlice";
 
 export default function TeacherProfile() {
-  const dispatch = useDispatch();
-
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,32 +10,28 @@ export default function TeacherProfile() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    profilePicture: "",
+    imageUrl: "",
   });
-  const [profileImage, setProfileImage] = useState(null);
   const [preview, setPreview] = useState("");
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmNewPassword: "",
-  });
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/users/me", {
+        const res = await axios.get("http://localhost:3000/api/teacher/profile", {
           withCredentials: true,
         });
 
-        setProfile(res.data.user);
+        const teacher = res.data.teacher;
+        setProfile(teacher);
         setFormData({
-          name: res.data.user.name,
-          email: res.data.user.email,
-          profilePicture: res.data.user.profilePicture,
+          name: teacher.name,
+          email: teacher.email,
+          imageUrl: teacher.imageUrl || "",
         });
-        setPreview(res.data.user.profilePicture);
+        setPreview(teacher.imageUrl || "");
         setLoading(false);
       } catch (err) {
+        console.error(err);
         setError("Failed to load profile");
         setLoading(false);
       }
@@ -48,67 +40,32 @@ export default function TeacherProfile() {
     fetchProfile();
   }, []);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    setProfileImage(file);
-    if (file) {
-      setPreview(URL.createObjectURL(file));
-    }
-  };
-
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "imageUrl") {
+      setPreview(value);
+    }
   };
 
   const handleProfileUpdate = async () => {
     try {
-      const data = new FormData();
-      data.append("name", formData.name);
-      if (profileImage) data.append("profilePicture", profileImage);
-
       const res = await axios.put(
-        "http://localhost:3000/api/users/update-profile",
-        data,
+        "http://localhost:3000/api/teacher/profile",
         {
-          withCredentials: true,
-        }
+          name: formData.name,
+          profilePicture: formData.imageUrl, // matched to backend field
+        },
+        { withCredentials: true }
       );
 
-      if (res.data.success) {
-        toast.success("Profile updated");
-        dispatch(updateUser());
-        setIsEditing(false);
-      }
+      setProfile(res.data.teacher);
+      toast.success("Profile updated successfully");
+      setIsEditing(false);
     } catch (err) {
+      console.error(err);
       toast.error("Failed to update profile");
-    }
-  };
-
-  const handlePasswordUpdate = async () => {
-    if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
-
-    try {
-      const res = await axios.put(
-        "http://localhost:3000/api/users/change-password",
-        passwordData,
-        {
-          withCredentials: true,
-        }
-      );
-
-      if (res.data.success) {
-        toast.success("Password updated");
-        setPasswordData({
-          currentPassword: "",
-          newPassword: "",
-          confirmNewPassword: "",
-        });
-      }
-    } catch (err) {
-      toast.error("Failed to update password");
     }
   };
 
@@ -135,14 +92,21 @@ export default function TeacherProfile() {
               <label style={styles.label}>Email:</label>
               <input
                 type="email"
+                name="email"
                 value={formData.email}
                 readOnly
                 style={styles.input}
               />
             </div>
             <div style={styles.inputGroup}>
-              <label style={styles.label}>Profile Picture:</label>
-              <input type="file" onChange={handleImageChange} />
+              <label style={styles.label}>Profile Picture URL (Optional):</label>
+              <input
+                type="text"
+                name="imageUrl"
+                value={formData.imageUrl}
+                onChange={handleInputChange}
+                style={styles.input}
+              />
               {preview && (
                 <img src={preview} alt="Preview" style={styles.preview} />
               )}
@@ -151,92 +115,24 @@ export default function TeacherProfile() {
               <button onClick={handleProfileUpdate} style={styles.saveButton}>
                 Save
               </button>
-              <button
-                onClick={() => setIsEditing(false)}
-                style={styles.cancelButton}
-              >
+              <button onClick={() => setIsEditing(false)} style={styles.cancelButton}>
                 Cancel
               </button>
             </div>
           </>
         ) : (
           <>
-            <p style={styles.info}>
-              <strong>Name:</strong> {profile?.name}
-            </p>
-            <p style={styles.info}>
-              <strong>Email:</strong> {profile?.email}
-            </p>
-            <p style={styles.info}>
-              <strong>Role:</strong> {profile?.role}
-            </p>
-            {profile?.profilePicture && (
-              <img
-                src={profile.profilePicture}
-                alt="Profile"
-                style={styles.preview}
-              />
+            <p style={styles.info}><strong>Name:</strong> {profile?.name}</p>
+            <p style={styles.info}><strong>Email:</strong> {profile?.email}</p>
+            <p style={styles.info}><strong>Role:</strong> {profile?.role}</p>
+            {profile?.imageUrl && (
+              <img src={profile.imageUrl} alt="Profile" style={styles.preview} />
             )}
-            <button
-              onClick={() => setIsEditing(true)}
-              style={styles.updateButton}
-            >
+            <button onClick={() => setIsEditing(true)} style={styles.updateButton}>
               Edit Profile
             </button>
           </>
         )}
-      </div>
-
-      {/* Password Update */}
-      <h3 style={{ marginTop: "30px", color: "#008080" }}>
-        Change Password
-      </h3>
-      <div style={styles.card}>
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>Current Password:</label>
-          <input
-            type="password"
-            name="currentPassword"
-            value={passwordData.currentPassword}
-            onChange={(e) =>
-              setPasswordData({
-                ...passwordData,
-                currentPassword: e.target.value,
-              })
-            }
-            style={styles.input}
-          />
-        </div>
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>New Password:</label>
-          <input
-            type="password"
-            name="newPassword"
-            value={passwordData.newPassword}
-            onChange={(e) =>
-              setPasswordData({ ...passwordData, newPassword: e.target.value })
-            }
-            style={styles.input}
-          />
-        </div>
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>Confirm New Password:</label>
-          <input
-            type="password"
-            name="confirmNewPassword"
-            value={passwordData.confirmNewPassword}
-            onChange={(e) =>
-              setPasswordData({
-                ...passwordData,
-                confirmNewPassword: e.target.value,
-              })
-            }
-            style={styles.input}
-          />
-        </div>
-        <button onClick={handlePasswordUpdate} style={styles.saveButton}>
-          Change Password
-        </button>
       </div>
     </div>
   );

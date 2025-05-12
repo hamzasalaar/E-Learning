@@ -13,6 +13,7 @@ const {
   updateUserProfile,
   getCourseDetails,
 } = require("../controllers/studentController");
+const { getMaterialsForCourse } = require("../controllers/materialController");
 
 const StudentRoute = express.Router();
 
@@ -31,6 +32,7 @@ StudentRoute.put("/:courseId/update-review", updateReview);
 StudentRoute.delete("/:courseId/review", deleteReview);
 
 StudentRoute.put("/progress/:courseId", updateProgress); // Update progress in a course
-StudentRoute.get("/course/:courseId", getCourseDetails);
+StudentRoute.get("/courses/:courseId", getCourseDetails);
+StudentRoute.get("/courses/:courseId/materials", getMaterialsForCourse);
 
 module.exports = StudentRoute;

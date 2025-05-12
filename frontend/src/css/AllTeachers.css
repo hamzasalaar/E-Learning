@@ -1,0 +1,68 @@
+.teachers-page {
+  padding: 40px 20px;
+  background-color: #f2f2f2;
+  font-family: "Segoe UI", sans-serif;
+  min-height: 100vh;
+  text-align: center;
+}
+
+.title {
+  font-size: 28px;
+  color: #00796b;
+  margin-bottom: 30px;
+}
+
+.teachers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.teacher-card {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s;
+}
+
+.teacher-card:hover {
+  transform: translateY(-4px);
+}
+
+.teacher-img {
+  width: 100%;
+  max-width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 15px;
+}
+
+.teacher-card h4 {
+  margin: 0;
+  color: #222;
+}
+
+.teacher-card p {
+  color: #555;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.center {
+  text-align: center;
+  padding: 50px;
+}
+
+.error {
+  color: red;
+}
+.course-count {
+  font-size: 13px;
+  color: #00796b;
+  margin-top: 6px;
+  font-weight: 500;
+}

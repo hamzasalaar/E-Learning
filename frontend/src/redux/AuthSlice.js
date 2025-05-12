@@ -7,7 +7,7 @@ export const updateUser=createAsyncThunk('updateuser',async()=>{
         const request=await get('/api/auth/check-auth')
         const response=request.data
 
-        return response;
+        return response.user;
      } catch (error) {
           throw error
      }

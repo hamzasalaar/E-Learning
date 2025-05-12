@@ -124,7 +124,7 @@ const getSingleCourse = async (req, res) => {
     const { courseId } = req.params;
 
     const course = await Course.findById(courseId).populate(
-      "studentsEnrolled",
+      "studentsEnrolled reviews.user",
       "name email"
     );
 
@@ -146,39 +146,60 @@ const getSingleCourse = async (req, res) => {
   }
 };
 
+// Get the logged-in teacher's profile
 const getTeacherProfile = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    if (req.user.role !== "teacher") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Access denied. Teachers only." });
+    }
+
+    const teacher = await User.findById(req.user.id).select("-password -__v");
+
+    if (!teacher) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Teacher not found" });
+    }
+
+    res.status(200).json({ success: true, teacher });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Update the teacher's profile
+const updateTeacherProfile = async (req, res) => {
+  try {
+    if (req.user.role !== "teacher") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Access denied. Teachers only." });
+    }
+
+    const { name, profilePicture } = req.body;
 
     const teacher = await User.findById(req.user.id);
     if (!teacher) {
       return res
         .status(404)
-        .json({ success: false, message: "Teacher not found!" });
+        .json({ success: false, message: "Teacher not found" });
     }
 
-    // Only update fields if provided
     if (name) teacher.name = name;
-    if (email) teacher.email = email;
-    if (password) {
-      const bcrypt = require("bcryptjs");
-      const salt = await bcrypt.genSalt(10);
-      teacher.password = await bcrypt.hash(password, salt);
-    }
+    if (profilePicture) teacher.imageUrl = profilePicture;
 
     await teacher.save();
 
     res.status(200).json({
       success: true,
-      message: "Profile updated successfully!",
-      teacher: {
-        id: teacher._id,
-        name: teacher.name,
-        email: teacher.email,
-        role: teacher.role,
-      },
+      message: "Profile updated successfully",
+      teacher,
     });
-  } catch (error) {}
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 module.exports = {
@@ -186,5 +207,6 @@ module.exports = {
   getEnrolledStudents,
   resubmitCourse,
   getSingleCourse, // ✅ include here
-  getTeacherProfile,
+  getTeacherProfile, // ✅ now added
+  updateTeacherProfile, // ✅ now added
 };

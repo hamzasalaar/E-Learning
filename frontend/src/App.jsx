@@ -26,6 +26,8 @@ import PublicCourses from "./pages/PublicCourses";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Tutors from "./pages/Tutors";
+import StudentCourseContent from "./pages/StudentCourseContent";
+import AllTeachers from "./pages/AllTeachers";
 
 export default function App() {
   return (
@@ -37,10 +39,10 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/PublicCourse" element={<PublicCourses />} />
+          <Route path="/courses" element={<PublicCourses />} />
           <Route path="/About" element={<About />} />
           <Route path="/Contact" element={<Contact />} />
-          <Route path="/Tutors" element={<Tutors />} />
+          <Route path="/Tutors" element={<AllTeachers />} />
         </Route>
 
         {/* Admin Layout */}
@@ -55,8 +57,8 @@ export default function App() {
           <Route path="dashboard" element={<TeacherDashboard />} />
           <Route path="addcourse" element={<AddCourse />} />
           <Route path="course-details" element={<CourseDetails />} />
-          <Route path="TeacherCourses" element={<TeacherCourses />} />
-          <Route path="courses/:id" element={<CourseContent />} />
+          <Route path="teacher-courses" element={<TeacherCourses />} />
+          <Route path="courses/:courseId" element={<CourseContent />} />
           <Route path="profile" element={<TeacherProfile />} />
           <Route path="Notifications" element={<TeacherNotifications />} />
           <Route path="students" element={<TeacherStudents />} />
@@ -66,6 +68,10 @@ export default function App() {
         <Route path="/student" element={<StudentLayout />}>
           <Route path="my-courses" element={<MyCourses />} />
           <Route path="profile" element={<StudentProfile />} />
+          <Route
+            path="course-content/:courseId"
+            element={<StudentCourseContent />}
+          />
         </Route>
       </Routes>
     </BrowserRouter>

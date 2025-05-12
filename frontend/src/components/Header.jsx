@@ -6,7 +6,6 @@ import { useState } from "react";
 import { Logout } from "../redux/AuthSlice";
 // Removed from the top level and will be added inside the Header component
 
-
 const Header = () => {
   const user = useSelector((state) => state.Auth.user);
   const dispatch = useDispatch();
@@ -17,7 +16,11 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
-      const res = await axios.post("http://localhost:3000/api/auth/logout", {}, { withCredentials: true });
+      const res = await axios.post(
+        "http://localhost:3000/api/auth/logout",
+        {},
+        { withCredentials: true }
+      );
       if (res.status === 200) {
         dispatch(Logout());
         navigate("/");
@@ -39,52 +42,83 @@ const Header = () => {
           </Link>
 
           {/* Hamburger Menu Icon */}
-          <button className="menu-toggle" onClick={toggleMenu} aria-label="Toggle Menu">
+          <button
+            className="menu-toggle"
+            onClick={toggleMenu}
+            aria-label="Toggle Menu"
+          >
             {menuOpen ? <FaTimes /> : <FaBars />}
           </button>
 
           {/* Navigation */}
           <nav className={`nav ${menuOpen ? "active" : ""}`}>
-            <Link to="/" className="nav-link">Home</Link>
-            <Link to="/about" className="nav-link">About</Link>
-            <Link to="/PublicCourse" className="nav-link">Courses</Link>
-            <Link to="/tutors" className="nav-link">Tutors</Link>
-            <Link to="/contact" className="nav-link">Contact</Link>
+            <Link to="/" className="nav-link">
+              Home
+            </Link>
+            <Link to="/about" className="nav-link">
+              About
+            </Link>
+            <Link to="/courses" className="nav-link">
+              Courses
+            </Link>
+            <Link to="/tutors" className="nav-link">
+              Tutors
+            </Link>
+            <Link to="/contact" className="nav-link">
+              Contact
+            </Link>
           </nav>
+
+          {/* <span>Welcome {user.email?.split(" ")[0]}</span> */}
 
           {/* Auth Buttons / Profile Dropdown / Cart */}
           <div className={`auth-cart ${menuOpen ? "active" : ""}`}>
             {user ? (
               <div
-              className="user-menu"
-              onMouseEnter={() => {
-                if (hideTimeout) clearTimeout(hideTimeout);
-                setDropdownOpen(true);
-              }}
-              onMouseLeave={() => {
-                const timeout = setTimeout(() => {
-                  setDropdownOpen(false);
-                }, 300); // 300ms delay before hiding
-                setHideTimeout(timeout);
-              }}
-            >
-            
+                className="user-menu"
+                onMouseEnter={() => {
+                  if (hideTimeout) clearTimeout(hideTimeout);
+                  setDropdownOpen(true);
+                }}
+                onMouseLeave={() => {
+                  const timeout = setTimeout(() => {
+                    setDropdownOpen(false);
+                  }, 300); // 300ms delay before hiding
+                  setHideTimeout(timeout);
+                }}
+              >
                 <div className="user-initials">
-                  {user.name?.charAt(0).toUpperCase() || "U"}
+                  {user.name?.charAt(0).toUpperCase() ||
+                    user.email.charAt(0).toUpperCase()}
                 </div>
                 {dropdownOpen && (
                   <div className="user-dropdown">
-                    <span className="dropdown-item">Hi, {user.name?.split(" ")[0]}</span>
-                    <Link to="/student/profile" className="dropdown-item">Profile</Link>
-                    <Link to="/student/my-courses" className="dropdown-item">My Courses</Link>
-                    <button onClick={handleLogout} className="dropdown-item logout-btn">Logout</button>
+                    <span className="dropdown-item">
+                      Hi, {user.email?.split(" ")[0]}
+                    </span>
+                    <Link to="/student/profile" className="dropdown-item">
+                      Profile
+                    </Link>
+                    <Link to="/student/my-courses" className="dropdown-item">
+                      My Courses
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="dropdown-item logout-btn"
+                    >
+                      Logout
+                    </button>
                   </div>
                 )}
               </div>
             ) : (
               <>
-                <Link to="/login" className="login">Login</Link>
-                <Link to="/register" className="register">Register</Link>
+                <Link to="/login" className="login">
+                  Login
+                </Link>
+                <Link to="/register" className="register">
+                  Register
+                </Link>
               </>
             )}
             <Link to="/cart" className="cart">

@@ -10,12 +10,15 @@ const TeacherCourses = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/teacher/courses", {
-          withCredentials: true,
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+        const res = await axios.get(
+          "http://localhost:3000/api/teacher/courses",
+          {
+            withCredentials: true,
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
         setCourses(res.data.courses || []);
       } catch (err) {
         console.error(err);
@@ -41,26 +44,49 @@ const TeacherCourses = () => {
       ) : (
         <div className="course-list">
           {courses.map((course) => (
-            <Link 
-              to={`/teacher/courses/${course._id}`} 
-              className="course-card" 
+            <Link
+              to={`/teacher/courses/${course._id}`}
+              className="course-card"
               key={course._id}
-              style={{ textDecoration: 'none', color: 'inherit' }}
+              style={{ textDecoration: "none", color: "inherit" }}
             >
-              <img src={course.imageUrl} alt={course.title} className="course-image" />
+              <img
+                src={`http://localhost:3000${course.imageUrl}`}
+                alt={course.title}
+                className="course-image"
+              />
 
               <div className="course-content">
                 <h3>{course.title}</h3>
-                <p className="description">{course.description.slice(0, 100)}...</p>
+                <p className="description">
+                  {course.description.slice(0, 100)}...
+                </p>
 
                 <div className="details">
-                  <p><strong>Status:</strong> <span className={`status ${course.status}`}>{course.status}</span></p>
-                  <p><strong>Price:</strong> ${course.price.toFixed(2)}</p>
-                  <p><strong>Students Enrolled:</strong> {course.studentsEnrolled?.length || 0}</p>
-                  <p><strong>Rating:</strong> {course.rating}/5</p>
-                  <p><strong>Created:</strong> {new Date(course.createdAt).toLocaleDateString()}</p>
+                  <p>
+                    <strong>Status:</strong>{" "}
+                    <span className={`status ${course.status}`}>
+                      {course.status}
+                    </span>
+                  </p>
+                  <p>
+                    <strong>Price:</strong> ${course.price.toFixed(2)}
+                  </p>
+                  <p>
+                    <strong>Students Enrolled:</strong>{" "}
+                    {course.studentsEnrolled?.length || 0}
+                  </p>
+                  <p>
+                    <strong>Rating:</strong> {course.rating}/5
+                  </p>
+                  <p>
+                    <strong>Created:</strong>{" "}
+                    {new Date(course.createdAt).toLocaleDateString()}
+                  </p>
                   {course.status === "rejected" && (
-                    <p className="rejection"><strong>Reason:</strong> {course.rejectionReason}</p>
+                    <p className="rejection">
+                      <strong>Reason:</strong> {course.rejectionReason}
+                    </p>
                   )}
                 </div>
               </div>

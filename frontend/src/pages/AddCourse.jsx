@@ -11,10 +11,9 @@ const AddCourse = () => {
     description: "",
     videoUrl: "",
     price: 0,
-    imageUrl: "",
+    imageUrl: null,
   });
 
-  const [lectureNotes, setLectureNotes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -24,7 +23,7 @@ const AddCourse = () => {
   };
 
   const handleFileChange = (e) => {
-    setLectureNotes(e.target.files);
+    setFormData((prev) => ({ ...prev, image: e.target.files[0] }));
   };
 
   const handleSubmit = async (e) => {
@@ -38,11 +37,7 @@ const AddCourse = () => {
       data.append("description", formData.description);
       data.append("videoUrl", formData.videoUrl);
       data.append("price", formData.price);
-      data.append("imageUrl", formData.imageUrl);
-
-      for (let i = 0; i < lectureNotes.length; i++) {
-        data.append("lectureNotes", lectureNotes[i]);
-      }
+      data.append("image", formData.image); // <-- append file
 
       const res = await axios.post(
         "http://localhost:3000/api/teacher/create-course",
@@ -51,15 +46,13 @@ const AddCourse = () => {
           withCredentials: true,
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
 
       if (res.status === 201) {
         toast.success("Course added successfully!");
-        setFormData({ title: "", description: "", videoUrl: "", price: 0 });
-        setLectureNotes([]);
+        navigate(`/teacher/courses/${res.data.course._id}`);
       }
     } catch (err) {
       console.error(err);
@@ -68,7 +61,6 @@ const AddCourse = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className="add-course">
       <h2>Add a New Course</h2>
@@ -96,14 +88,15 @@ const AddCourse = () => {
 
         <label>
           Course Image (PostImages URL):
-          <input
-            type="url"
-            name="imageUrl"
-            value={formData.imageUrl}
-            onChange={handleChange}
-            placeholder="https://postimg.cc/XXXXXX"
-            required
-          />
+          <label>
+            Course Image:
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              required
+            />
+          </label>
           <small className="hint">
             Upload your image to{" "}
             <a
@@ -124,17 +117,6 @@ const AddCourse = () => {
             name="videoUrl"
             value={formData.videoUrl}
             onChange={handleChange}
-          />
-        </label>
-
-        <label>
-          Lecture Notes (PDF files):
-          <input
-            type="file"
-            name="lectureNotes"
-            accept=".pdf"
-            multiple
-            onChange={handleFileChange}
           />
         </label>
 

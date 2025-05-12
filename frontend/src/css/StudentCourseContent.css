@@ -1,0 +1,110 @@
+.student-course-content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: "Inter", sans-serif;
+  background-color: #f2f2f2;
+  color: #1f2937;
+  border-radius: 12px;
+}
+
+.course-header {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06);
+  margin-bottom: 32px;
+}
+
+.section-heading {
+  margin-top: 40px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #00796b;
+  border-left: 5px solid #00796b;
+  padding-left: 12px;
+  margin-bottom: 20px;
+}
+
+.material-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.material-card {
+  background: #ffffff;
+  padding: 20px;
+  border: 1px solid #d1d5db;
+  border-left: 6px solid #00796b;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease;
+}
+
+.material-card:hover {
+  transform: translateY(-2px);
+}
+
+.material-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.badge {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  background-color: #f2f2f2;
+  color: #00796b;
+  border: 1px solid #00796b;
+  text-transform: uppercase;
+}
+
+.badge-lecture {
+  background: #e0f7fa;
+  color: #00796b;
+}
+.badge-video {
+  background: #e0f2f1;
+  color: #004d40;
+}
+.badge-reading {
+  background: #fce4ec;
+  color: #880e4f;
+}
+.badge-assignment {
+  background: #fff9c4;
+  color: #795548;
+}
+.badge-quiz {
+  background: #ede7f6;
+  color: #4527a0;
+}
+
+.material-links a {
+  display: inline-block;
+  margin-right: 12px;
+  margin-top: 10px;
+  color: #00796b;
+  font-weight: 500;
+  text-decoration: none;
+  border-bottom: 1px dashed transparent;
+  transition: all 0.2s ease;
+}
+
+.material-links a:hover {
+  color: #004d40;
+  border-bottom: 1px dashed #004d40;
+}
+
+.instructions,
+.due-date {
+  font-size: 14px;
+  color: #374151;
+  margin-top: 6px;
+  line-height: 1.5;
+}

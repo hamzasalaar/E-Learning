@@ -13,10 +13,10 @@ const materialSchema = new mongoose.Schema(
       enum: ["lecture", "video", "reading", "assignment", "quiz"],
       required: true,
     },
-    filePath: { type: String }, // for uploaded files
-    url: { type: String }, // for external links like YouTube
-    dueDate: { type: Date },
-    instructions: { type: String },
+    filePaths: [String], // for uploaded files
+    url: String, // for external links like YouTube
+    dueDate: Date,
+    instructions: String,
   },
   { timestamps: true }
 );

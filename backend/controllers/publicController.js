@@ -23,6 +23,29 @@ const publicCourses = async (req, res) => {
   }
 };
 
+const getAllTeachers = async (req, res) => {
+  try {
+    const teachers = await UserModel.find({ role: "teacher" }).select(
+      "name email profilePicture"
+    );
+
+    const teacherData = await Promise.all(
+      teachers.map(async (teacher) => {
+        const courses = await CourseModel.find({ teacher: teacher._id });
+        return {
+          ...teacher.toObject(),
+          courseCount: courses.length,
+        };
+      })
+    );
+
+    res.status(200).json({ success: true, teachers: teacherData });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   publicCourses,
+  getAllTeachers,
 };

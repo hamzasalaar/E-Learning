@@ -70,51 +70,51 @@ export default function MyCourses() {
           </select>
         </div>
       </div>
+      <div className="course-grid-wrapper">
+        <div className="courses-grid">
+          {filteredCourses.length > 0 ? (
+            filteredCourses.map((course) => (
+              <div key={course._id} className="course-card">
+                <img
+                  src={`http://localhost:3000${course.imageUrl}` || "/default-course.jpg"}
+                  alt={course.title}
+                  className="course-img"
+                />
+                <div className="card-body">
+                  <h3 className="title">{course.title}</h3>
+                  <p className="instructor">
+                    By {course.teacher?.name || "Instructor"}
+                  </p>
+                  <p className="desc">
+                    {course.description?.slice(0, 80) || "No description"}...
+                  </p>
 
-      <div className="courses-grid">
-        {filteredCourses.length > 0 ? (
-          filteredCourses.map((course) => (
-            <div key={course._id} className="course-card">
-              <img
-                src={course.image || "/default-course.jpg"}
-                alt={course.title}
-                className="course-img"
-              />
-              <div className="card-body">
-                <h3 className="title">{course.title}</h3>
-                <p className="instructor">
-                  By {course.teacher?.name || "Instructor"}
-                </p>
-                <p className="desc">
-                  {course.description?.slice(0, 80) || "No description"}...
-                </p>
-
-                <div className="progress-bar-container">
-                  <div className="progress-bar">
-                    <div
-                      className="progress"
-                      style={{ width: `${course.progress.percentage}%` }}
-                    ></div>
+                  <div className="progress-bar-container">
+                    <div className="progress-bar">
+                      <div
+                        className="progress"
+                        style={{ width: `${course.progress.percentage}%` }}
+                      ></div>
+                    </div>
+                    <span className="progress-text">
+                      {course.progress.percentage}% complete
+                    </span>
                   </div>
-                  <span className="progress-text">
-                    {course.progress.percentage}% complete
-                  </span>
-                </div>
 
-                <Link
-                  to={`/student/course-content/${course._id}`}
-                  className="continue-btn"
-                >
-                  Continue Learning
-                </Link>
+                  <Link
+                    to={`/student/course-content/${course._id}`}
+                    className="continue-btn"
+                  >
+                    Continue Learning
+                  </Link>
+                </div>
               </div>
-            </div>
-          ))
-        ) : (
-          <p>No courses enrolled yet.</p>
-        )}
+            ))
+          ) : (
+            <p>No courses enrolled yet.</p>
+          )}
+        </div>
       </div>
     </div>
   );
 }
-

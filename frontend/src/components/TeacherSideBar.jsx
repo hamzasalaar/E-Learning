@@ -57,13 +57,28 @@ export default function TeacherSidebar() {
 
       {/* Navigation */}
       <nav className="menu">
-        <Link to="/teacher/dashboard" className={`menu-item ${isActive("/teacher/dashboard") ? "active" : ""}`}>
+        <Link
+          to="/teacher/dashboard"
+          className={`menu-item ${
+            isActive("/teacher/dashboard") ? "active" : ""
+          }`}
+        >
           <FaHome /> Dashboard
         </Link>
-        <Link to="/teacher/addcourse" className={`menu-item ${isActive("/teacher/addcourse") ? "active" : ""}`}>
+        <Link
+          to="/teacher/addcourse"
+          className={`menu-item ${
+            isActive("/teacher/addcourse") ? "active" : ""
+          }`}
+        >
           <FaChalkboardTeacher /> Add Course
         </Link>
-        <Link to="/teacher/TeacherCourses" className={`menu-item ${isActive("/teacher/TeacherCourses") ? "active" : ""}`}>
+        <Link
+          to="/teacher/teacher-courses"
+          className={`menu-item ${
+            isActive("/teacher/teacher-courses") ? "active" : ""
+          }`}
+        >
           <FaBook /> My Courses
         </Link>
         <Link to="/teacher/students" className="menu-item">
