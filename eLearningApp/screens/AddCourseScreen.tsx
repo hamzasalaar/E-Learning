@@ -71,6 +71,18 @@ export default function AddCourseScreen() {
 
       if (res.status === 201 && res.data.course?._id) {
         Alert.alert("Success", "Course added!");
+
+        // Reset form
+        setFormData({
+          title: "",
+          description: "",
+          videoUrl: "",
+          price: "",
+          imageUrl: "",
+        });
+        setLectureNotes([]);
+
+        // Navigate
         navigation.navigate("TeacherCourseContent", {
           courseId: res.data.course._id,
         });

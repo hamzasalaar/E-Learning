@@ -13,18 +13,20 @@ import { Feather } from "@expo/vector-icons";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store";
-import { logoutUser } from "../redux/authSlice";
 import api from "../api";
 import ScreenWrapper from "../components/ScreenWrapper";
 import TopBar from "../components/TopBar";
+import { useNavigation } from "@react-navigation/native";
 
 const HomeScreen = ({ navigation }: { navigation: DrawerNavigationProp<any> }) => {
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.auth.user);
+  const nav = useNavigation<any>();
 
-  const [courses, setCourses] = useState([]);
-  const [tutors, setTutors] = useState([]);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [tutors, setTutors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [enrolledCourses, setEnrolledCourses] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchHomeData = async () => {
@@ -42,9 +44,27 @@ const HomeScreen = ({ navigation }: { navigation: DrawerNavigationProp<any> }) =
     fetchHomeData();
   }, []);
 
-  const handleLogout = () => {
-    dispatch(logoutUser());
-    Alert.alert("Logged out", "You have been successfully logged out.");
+  const handleEnroll = async (courseId: string) => {
+    if (!user) {
+      Alert.alert("Login required", "Please login or register to enroll in a course.");
+      nav.navigate("Register");
+      return;
+    }
+
+    if (user.role !== "student") {
+      Alert.alert("Access denied", "Only students can enroll in courses.");
+      return;
+    }
+
+    try {
+      const res = await api.post(`/student/enroll/${courseId}`, {}, { withCredentials: true });
+      if (res.data.success) {
+        setEnrolledCourses((prev) => [...prev, courseId]);
+        Alert.alert("Enrolled", "You have successfully enrolled in the course.");
+      }
+    } catch (err: any) {
+      Alert.alert("Error", err.response?.data?.message || "Failed to enroll.");
+    }
   };
 
   if (loading) {
@@ -56,26 +76,37 @@ const HomeScreen = ({ navigation }: { navigation: DrawerNavigationProp<any> }) =
   }
 
   return (
-    
     <ScreenWrapper key={user ? user.id : "guest"}>
-     <TopBar />
+      <TopBar />
       <ScrollView style={styles.container}>
-        
         <Text style={styles.sectionTitle}>Popular Courses</Text>
-        <View style={styles.grid}>
-          {courses.map((course: any) => (
+        <View style={styles.grid}> 
+          {courses.map((course) => (
             <View key={course._id} style={styles.card}>
               <Image source={{ uri: course.imageUrl }} style={styles.courseImage} />
               <Text style={styles.title}>{course.title}</Text>
+              <Text numberOfLines={2} style={styles.desc}>{course.description}</Text>
               <Text style={styles.price}>${course.price}</Text>
-              <Text style={styles.instructor}>By {course.teacher?.name}</Text>
+              <Text style={styles.instructor}>By {course.teacher?.name || "Instructor"}</Text>
+              <TouchableOpacity
+                style={[
+                  styles.enrollButton,
+                  enrolledCourses.includes(course._id) && styles.disabledButton,
+                ]}
+                onPress={() => handleEnroll(course._id)}
+                disabled={enrolledCourses.includes(course._id)}
+              >
+                <Text style={styles.enrollText}>
+                  {enrolledCourses.includes(course._id) ? "Enrolled" : "Enroll"}
+                </Text>
+              </TouchableOpacity>
             </View>
           ))}
         </View>
 
         <Text style={styles.sectionTitle}>Popular Tutors</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingBottom: 20 }}>
-          {tutors.map((tutor: any) => (
+          {tutors.map((tutor) => (
             <View key={tutor._id} style={styles.tutorCard}>
               <Feather name="user" size={32} color="#007bff" />
               <Text style={styles.tutorName}>{tutor.name}</Text>
@@ -108,7 +139,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 10,
     borderRadius: 8,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   courseImage: {
     width: "100%",
@@ -121,6 +152,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 4,
   },
+  desc: {
+    fontSize: 12,
+    color: "#555",
+    marginBottom: 4,
+  },
   price: {
     color: "#007bff",
     fontWeight: "bold",
@@ -129,6 +165,21 @@ const styles = StyleSheet.create({
   instructor: {
     color: "#555",
     fontSize: 12,
+    marginBottom: 8,
+  },
+  enrollButton: {
+    backgroundColor: "#007bff",
+    padding: 8,
+    borderRadius: 6,
+    alignItems: "center",
+  },
+  enrollText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  disabledButton: {
+    backgroundColor: "#aaa",
   },
   tutorCard: {
     backgroundColor: "#fff",
@@ -151,32 +202,6 @@ const styles = StyleSheet.create({
   tutorEmail: {
     fontSize: 12,
     color: "#666",
-  },
-  topBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 10,
-    backgroundColor: "#ffffff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
-  menuIcon: {
-    paddingHorizontal: 10,
-  },
-  rightContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  authText: {
-    color: "#007bff",
-    fontSize: 16,
-    marginHorizontal: 6,
-    fontWeight: "500",
-  },
-  separator: {
-    fontSize: 16,
-    color: "#999",
   },
 });
 

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
 
 export default function PublicCourses() {
   const [courses, setCourses] = useState([]);
@@ -9,6 +11,10 @@ export default function PublicCourses() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("all");
   const [filteredCourses, setFilteredCourses] = useState([]);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+
+  const navigate = useNavigate();
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -43,6 +49,33 @@ export default function PublicCourses() {
     setFilteredCourses(result);
   }, [search, sort, courses]);
 
+  const handleEnroll = async (courseId) => {
+    if (!user) {
+      toast.error("Please register or login to enroll in a course.");
+      navigate("/register");
+      return;
+    }
+
+    if (user.role !== "student") {
+      toast.error("Only students can enroll in courses.");
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        `http://localhost:3000/api/student/enroll/${courseId}`,
+        {},
+        { withCredentials: true }
+      );
+      if (res.data.success) {
+        setEnrolledCourses((prev) => [...prev, courseId]);
+        toast.success("Enrolled successfully!");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to enroll in course.");
+    }
+  };
+
   return (
     <div className="public-courses">
       <h2>All Courses</h2>
@@ -74,12 +107,7 @@ export default function PublicCourses() {
       ) : (
         <div className="course-list">
           {filteredCourses.map((course) => (
-            <Link
-              to={`/courses/${course._id}`}
-              className="course-card"
-              key={course._id}
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
+            <div key={course._id} className="course-card-inner">
               <img
                 src={course.imageUrl || "/default-course.jpg"}
                 alt={course.title}
@@ -89,16 +117,23 @@ export default function PublicCourses() {
                   e.target.src = "/default-course.jpg";
                 }}
               />
-              <div className="course-content">
+              <div className="course-info">
                 <h3>{course.title}</h3>
-                <p className="description">{course.description.slice(0, 100)}...</p>
-                <div className="details">
-                  <p><strong>Price:</strong> ${course.price.toFixed(2)}</p>
-                  <p><strong>Students Enrolled:</strong> {course.studentsEnrolled?.length || 0}</p>
-                  <p><strong>Rating:</strong> {course.rating}/5</p>
+                <p>{course.description.slice(0, 100)}...</p>
+                <p className="price">${course.price}</p>
+                <p className="platform">By {course.teacher?.name || "Instructor"}</p>
+                <div className="rating">
+                  ⭐ {course.rating.toFixed(1)} ({course.reviews.length} reviews)
                 </div>
+                <button
+                  className="enroll-button"
+                  onClick={() => handleEnroll(course._id)}
+                  disabled={enrolledCourses.includes(course._id)}
+                >
+                  {enrolledCourses.includes(course._id) ? "Enrolled" : "Enroll"}
+                </button>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}
@@ -151,34 +186,23 @@ export default function PublicCourses() {
           font-size: 16px;
         }
 
-        .info, .error {
-          text-align: center;
-          font-size: 16px;
-          color: #555;
-        }
-
-        .error {
-          color: red;
-        }
-
         .course-list {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
           gap: 20px;
         }
 
-        .course-card {
+        .course-card-inner {
           background: #fff;
           border-radius: 10px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
           overflow: hidden;
           transition: transform 0.2s ease;
           display: flex;
           flex-direction: column;
-          cursor: pointer;
         }
 
-        .course-card:hover {
+        .course-card-inner:hover {
           transform: translateY(-5px);
         }
 
@@ -188,25 +212,45 @@ export default function PublicCourses() {
           object-fit: cover;
         }
 
-        .course-content {
-          padding: 15px 20px;
+        .course-info {
+          padding: 16px;
         }
 
-        .course-content h3 {
-          margin: 0 0 10px;
-          font-size: 20px;
-          color: #004d4d;
+        .course-info h3 {
+          font-size: 18px;
+          font-weight: 600;
+          margin-bottom: 8px;
         }
 
-        .description {
+        .course-info p {
           font-size: 14px;
-          color: #444;
-          margin-bottom: 10px;
+          color: #555;
+          margin: 4px 0;
         }
 
-        .details p {
-          margin: 5px 0;
-          font-size: 14px;
+        .price {
+          font-weight: bold;
+          color: #00796b;
+        }
+
+        .rating {
+          font-size: 13px;
+          color: #ffa41c;
+        }
+
+        .enroll-button {
+          margin-top: 10px;
+          padding: 10px 15px;
+          background-color: #00796b;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+
+        .enroll-button:disabled {
+          background-color: #ccc;
+          cursor: not-allowed;
         }
 
         @media (max-width: 768px) {
@@ -220,11 +264,6 @@ export default function PublicCourses() {
           .search-button {
             width: 100%;
             box-sizing: border-box;
-          }
-
-          .search-input {
-            border-top: 1px solid #ccc;
-            border-bottom: 1px solid #ccc;
           }
         }
       `}</style>
