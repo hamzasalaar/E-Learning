@@ -14,6 +14,11 @@ const {
   getCourseDetails,
 } = require("../controllers/studentController");
 const { getMaterialsForCourse } = require("../controllers/materialController");
+const {
+  joinLiveSession,
+  getLiveSessionsByCourse,
+  getRecordings,
+} = require("../controllers/liveSessionController");
 
 const StudentRoute = express.Router();
 
@@ -27,12 +32,17 @@ StudentRoute.post("/enroll/:courseId", enrollInCourse);
 StudentRoute.get("/my-courses", getEnrolledCourses);
 StudentRoute.post("/unenroll/:courseId", unenrollFromCourse);
 
-StudentRoute.post("/:courseId/review", createReview);
+StudentRoute.post("/review/:courseId", createReview);
 StudentRoute.put("/:courseId/update-review", updateReview);
 StudentRoute.delete("/:courseId/review", deleteReview);
 
 StudentRoute.put("/progress/:courseId", updateProgress); // Update progress in a course
 StudentRoute.get("/courses/:courseId", getCourseDetails);
 StudentRoute.get("/courses/:courseId/materials", getMaterialsForCourse);
+StudentRoute.get("/recordings/:meetingID", getRecordings);
 
+// Live session routes
+
+StudentRoute.get("/course/:courseId/live-sessions", getLiveSessionsByCourse); // Get live sessions for a course
+StudentRoute.get("/session/:sessionId/join", joinLiveSession);
 module.exports = StudentRoute;

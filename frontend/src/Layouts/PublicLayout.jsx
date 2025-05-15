@@ -14,8 +14,6 @@ export default function PublicLayouts() {
                 navigate('/admin'); // Redirect admin to AdminDashboard
             } else if (user.role === 'teacher') {
                 navigate('/teacher/dashboard'); // Redirect teacher to TeacherDashboard
-            } else if (user.role === 'student') {
-                navigate('/'); // Redirect student to Home
             }
         }
     }, [user, navigate]);

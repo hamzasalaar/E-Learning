@@ -8,12 +8,54 @@
   border-radius: 12px;
 }
 
-.course-header {
-  background: #ffffff;
-  padding: 24px;
+.course-header,
+.enhanced-student-header {
+  background-color: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06);
+  padding: 24px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
   margin-bottom: 32px;
+}
+
+.header-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.header-image {
+  flex-shrink: 0;
+}
+
+.course-img {
+  width: 220px;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.header-details {
+  flex-grow: 1;
+}
+
+.course-title {
+  margin: 0 0 10px;
+  font-size: 1.75rem;
+  color: #1e293b;
+}
+
+.course-description {
+  font-size: 1rem;
+  color: #475569;
+  margin-bottom: 12px;
+}
+
+.course-meta {
+  font-size: 0.95rem;
+  color: #334155;
+  line-height: 1.6;
+  margin-bottom: 16px;
 }
 
 .section-heading {
@@ -24,15 +66,18 @@
   border-left: 5px solid #00796b;
   padding-left: 12px;
   margin-bottom: 20px;
+  cursor: pointer;
 }
 
-.material-list {
+.material-list,
+.session-list {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
-.material-card {
+.material-card,
+.session-card {
   background: #ffffff;
   padding: 20px;
   border: 1px solid #d1d5db;
@@ -42,15 +87,17 @@
   transition: transform 0.2s ease;
 }
 
-.material-card:hover {
+.material-card:hover,
+.session-card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
 }
 
-.material-header {
+.material-header,
+.session-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
 }
 
 .badge {
@@ -59,36 +106,50 @@
   border-radius: 20px;
   font-weight: 600;
   background-color: #f2f2f2;
-  color: #00796b;
-  border: 1px solid #00796b;
   text-transform: uppercase;
+  border: 1px solid;
 }
 
 .badge-lecture {
   background: #e0f7fa;
   color: #00796b;
+  border-color: #00796b;
 }
 .badge-video {
   background: #e0f2f1;
   color: #004d40;
+  border-color: #004d40;
 }
 .badge-reading {
   background: #fce4ec;
   color: #880e4f;
+  border-color: #880e4f;
 }
 .badge-assignment {
   background: #fff9c4;
   color: #795548;
+  border-color: #795548;
 }
 .badge-quiz {
   background: #ede7f6;
   color: #4527a0;
+  border-color: #4527a0;
 }
 
-.material-links a {
+.instructions,
+.due-date,
+.session-description {
+  font-size: 14px;
+  color: #374151;
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+.material-links a,
+.watch-link {
   display: inline-block;
-  margin-right: 12px;
   margin-top: 10px;
+  margin-right: 12px;
   color: #00796b;
   font-weight: 500;
   text-decoration: none;
@@ -96,15 +157,76 @@
   transition: all 0.2s ease;
 }
 
-.material-links a:hover {
+.material-links a:hover,
+.watch-link:hover {
   color: #004d40;
   border-bottom: 1px dashed #004d40;
 }
 
-.instructions,
-.due-date {
+.session-time {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.join-session-btn {
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.join-session-btn:hover {
+  background-color: #125bc2;
+}
+
+.recordings-list {
+  margin-top: 14px;
+  padding-left: 10px;
+  border-left: 3px solid #ccc;
+}
+
+.recording-card {
+  background: #f1f5f9;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.unenroll-btn {
+  background-color: #dc3545;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
   font-size: 14px;
-  color: #374151;
-  margin-top: 6px;
-  line-height: 1.5;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 1rem;
+}
+
+.unenroll-btn:hover {
+  background-color: #b02a37;
+}
+
+.review-card {
+  padding: 12px;
+  background-color: #f9f9f9;
+  border-left: 4px solid #00bfa6;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.review-card p {
+  margin: 5px 0;
+}
+
+.review-card small {
+  color: #777;
+  font-size: 12px;
 }

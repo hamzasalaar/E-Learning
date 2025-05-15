@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { toast } from "react-hot-toast";
 
 export default function PublicCourses() {
   const [courses, setCourses] = useState([]);
@@ -9,12 +11,21 @@ export default function PublicCourses() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("all");
   const [filteredCourses, setFilteredCourses] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const coursesPerPage = 6;
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
 
+  const user = useSelector((state) => state.Auth.user);
+  const navigate = useNavigate();
+
+  // Fetch courses
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         const res = await axios.get("http://localhost:3000/api/public/courses");
-        const approvedCourses = res.data.courses.filter(c => c.status === "approved");
+        const approvedCourses = res.data.courses.filter(
+          (c) => c.status === "approved"
+        );
         setCourses(approvedCourses);
         setFilteredCourses(approvedCourses);
       } catch (err) {
@@ -28,10 +39,36 @@ export default function PublicCourses() {
     fetchCourses();
   }, []);
 
+  // Fetch enrolled courses
   useEffect(() => {
-    let result = courses.filter(course =>
-      course.title.toLowerCase().includes(search.toLowerCase()) ||
-      course.description.toLowerCase().includes(search.toLowerCase())
+    const fetchEnrolled = async () => {
+      if (user?.role === "student") {
+        try {
+          const res = await axios.get(
+            "http://localhost:3000/api/student/my-courses",
+            {
+              withCredentials: true,
+            }
+          );
+          const enrolledIds = res.data.coursesWithProgress.map((c) => c._id);
+          setEnrolledCourses(enrolledIds);
+        } catch (err) {
+          console.error("Failed to fetch enrolled courses", err);
+        }
+      } else {
+        setEnrolledCourses([]);
+      }
+    };
+
+    fetchEnrolled();
+  }, [user]);
+
+  // Handle search/sort
+  useEffect(() => {
+    let result = courses.filter(
+      (course) =>
+        course.title.toLowerCase().includes(search.toLowerCase()) ||
+        course.description.toLowerCase().includes(search.toLowerCase())
     );
 
     if (sort === "low") {
@@ -41,14 +78,55 @@ export default function PublicCourses() {
     }
 
     setFilteredCourses(result);
+    setCurrentPage(1);
   }, [search, sort, courses]);
+
+  const handleEnroll = async (courseId) => {
+    if (!user) {
+      toast.error("Please login to enroll.");
+      navigate("/login");
+      return;
+    }
+
+    if (user.role !== "student") {
+      toast.error("Only students can enroll.");
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        `http://localhost:3000/api/student/enroll/${courseId}`,
+        {},
+        { withCredentials: true }
+      );
+      if (res.data.success) {
+        setEnrolledCourses((prev) => [...prev, courseId]);
+        toast.success("Enrolled successfully!");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Enrollment failed.");
+    }
+  };
+
+  // Pagination
+  const indexOfLastCourse = currentPage * coursesPerPage;
+  const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
+  const currentCourses = filteredCourses.slice(
+    indexOfFirstCourse,
+    indexOfLastCourse
+  );
 
   return (
     <div className="public-courses">
       <h2>All Courses</h2>
 
       <div className="search-container">
-        <select value={sort} onChange={(e) => setSort(e.target.value)} className="sort-dropdown">
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value)}
+          className="sort-dropdown"
+        >
           <option value="all">All</option>
           <option value="low">Price: Low to High</option>
           <option value="high">Price: High to Low</option>
@@ -60,9 +138,7 @@ export default function PublicCourses() {
           onChange={(e) => setSearch(e.target.value)}
           className="search-input"
         />
-        <button className="search-button">
-          🔍
-        </button>
+        <button className="search-button">🔍</button>
       </div>
 
       {loading ? (
@@ -73,37 +149,107 @@ export default function PublicCourses() {
         <p className="info">No courses match your search.</p>
       ) : (
         <div className="course-list">
-          {filteredCourses.map((course) => (
-            <Link
-              to={`/courses/${course._id}`}
-              className="course-card"
-              key={course._id}
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              <img
-                src={course.imageUrl || "/default-course.jpg"}
-                alt={course.title}
-                className="course-image"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "/default-course.jpg";
-                }}
-              />
-              <div className="course-content">
-                <h3>{course.title}</h3>
-                <p className="description">{course.description.slice(0, 100)}...</p>
-                <div className="details">
-                  <p><strong>Price:</strong> ${course.price.toFixed(2)}</p>
-                  <p><strong>Students Enrolled:</strong> {course.studentsEnrolled?.length || 0}</p>
-                  <p><strong>Rating:</strong> {course.rating}/5</p>
+          {currentCourses.map((course) => {
+            const isEnrolled = enrolledCourses.includes(course._id);
+            return (
+              <div
+                className="course-card"
+                key={course._id}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <img
+                  src={
+                    `http://localhost:3000${course.imageUrl}` ||
+                    "/default-course.jpg"
+                  }
+                  alt={course.title}
+                  className="course-image"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/default-course.jpg";
+                  }}
+                />
+                <div className="course-content">
+                  <h3>{course.title}</h3>
+                  <p className="description">
+                    {course.description.slice(0, 100)}...
+                  </p>
+                  <div className="details">
+                    <p>
+                      <strong>Price:</strong> ${course.price.toFixed(2)}
+                    </p>
+                    <p>
+                      <strong>Students Enrolled:</strong>{" "}
+                      {course.studentsEnrolled?.length || 0}
+                    </p>
+                    <p>
+                      <strong>Rating:</strong> {course.rating}/5 ⭐
+                    </p>
+                  </div>
+                  {user?.role === "student" && isEnrolled ? (
+                    <Link
+                      to={`/student/course-content/${course._id}`}
+                      className="view-course-button"
+                    >
+                      View Course
+                    </Link>
+                  ) : (
+                    <button
+                      className="enroll-button"
+                      onClick={() => handleEnroll(course._id)}
+                    >
+                      Enroll
+                    </button>
+                  )}
                 </div>
               </div>
-            </Link>
-          ))}
+            );
+          })}
         </div>
       )}
 
+      <div className="pagination">
+        {Array.from(
+          { length: Math.ceil(filteredCourses.length / coursesPerPage) },
+          (_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => setCurrentPage(i + 1)}
+              className={currentPage === i + 1 ? "active" : ""}
+            >
+              {i + 1}
+            </button>
+          )
+        )}
+      </div>
+
       <style>{`
+        .pagination {
+          display: flex;
+          justify-content: center;
+          margin-top: 30px;
+          gap: 10px;
+        }
+
+        .pagination button {
+          background-color: #f0f0f0;
+          border: none;
+          padding: 8px 14px;
+          font-size: 14px;
+          cursor: pointer;
+          border-radius: 4px;
+          transition: background-color 0.3s;
+        }
+
+        .pagination button:hover {
+          background-color: #ddd;
+        }
+
+        .pagination button.active {
+          background-color: #00796b;
+          color: white;
+        }
+
         .public-courses {
           max-width: 1100px;
           margin: 0 auto;
@@ -208,6 +354,25 @@ export default function PublicCourses() {
           margin: 5px 0;
           font-size: 14px;
         }
+
+        .enroll-button,
+        .view-course-button {
+          margin-top: 10px;
+          padding: 8px 12px;
+          border: none;
+          border-radius: 5px;
+          font-size: 14px;
+          cursor: pointer;
+          display: inline-block;
+          text-align: center;
+          text-decoration: none;
+          background-color: #00796b;
+          color: white;
+        }
+          .enroll-button:hover,
+          .view-course-button:hover {
+          background-color:rgb(103, 173, 164);
+          }
 
         @media (max-width: 768px) {
           .search-container {

@@ -6,6 +6,8 @@ const TeacherCourses = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const coursesPerPage = 6; // Adjust as needed
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -31,6 +33,12 @@ const TeacherCourses = () => {
     fetchCourses();
   }, []);
 
+  const indexOfLastCourse = currentPage * coursesPerPage;
+  const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
+  const currentCourses = courses.slice(indexOfFirstCourse, indexOfLastCourse);
+
+  const totalPages = Math.ceil(courses.length / coursesPerPage);
+
   return (
     <div className="teacher-courses">
       <h2>My Courses</h2>
@@ -43,7 +51,7 @@ const TeacherCourses = () => {
         <p className="info">You have not added any courses yet.</p>
       ) : (
         <div className="course-list">
-          {courses.map((course) => (
+          {currentCourses.map((course) => (
             <Link
               to={`/teacher/courses/${course._id}`}
               className="course-card"
@@ -94,6 +102,27 @@ const TeacherCourses = () => {
           ))}
         </div>
       )}
+      <div className="pagination">
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Prev
+        </button>
+
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <button
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
 
       <style>{`
         .teacher-courses {
@@ -201,6 +230,34 @@ const TeacherCourses = () => {
             height: 150px;
           }
         }
+          .pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  background-color: #0066ff;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.pagination button:hover {
+  background-color: #0050cc;
+}
+
+.pagination button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
       `}</style>
     </div>
   );

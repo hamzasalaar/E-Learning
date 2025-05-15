@@ -1,5 +1,7 @@
 const Course = require("../models/courseModel");
 const User = require("../models/userModel");
+const bbb = require("../utils/bbb"); // Assuming you have a bbb.js file for BigBlueButton API
+const LiveSession = require("../models/liveSessionModel"); // Assuming you have a LiveSession model
 
 // Get all courses for the logged-in teacher
 const getTeacherCourses = async (req, res) => {
@@ -11,36 +13,12 @@ const getTeacherCourses = async (req, res) => {
     }
 
     const teacherId = req.user.id;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
-    const skip = (page - 1) * limit;
 
-    const search = req.query.search || "";
-    const searchRegex = new RegExp(search, "i");
-
-    const sortBy = req.query.sort || "createdAt";
-    const sortOrder = req.query.order === "asc" ? 1 : -1;
-
-    const filter = {
-      teacher: teacherId,
-      title: { $regex: searchRegex },
-    };
-
-    const totalCourses = await Course.countDocuments(filter);
-    const courses = await Course.find(filter)
-      .sort({ [sortBy]: sortOrder })
-      .skip(skip)
-      .limit(limit)
-      .exec();
-
-    const totalPages = Math.ceil(totalCourses / limit);
-
+    const courses = await Course.find({ teacher: teacherId });
+    
     res.status(200).json({
       success: true,
       courses,
-      currentPage: page,
-      totalPages,
-      totalCourses,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -206,7 +184,7 @@ module.exports = {
   getTeacherCourses,
   getEnrolledStudents,
   resubmitCourse,
-  getSingleCourse, // ✅ include here
-  getTeacherProfile, // ✅ now added
-  updateTeacherProfile, // ✅ now added
+  getSingleCourse,
+  getTeacherProfile,
+  updateTeacherProfile,
 };

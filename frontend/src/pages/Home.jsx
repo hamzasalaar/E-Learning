@@ -32,6 +32,30 @@ export default function Home() {
     fetchHomeData();
   }, []);
 
+  useEffect(() => {
+    const fetchEnrolledCourses = async () => {
+      if (user?.role === "student") {
+        try {
+          const res = await axios.get(
+            "http://localhost:3000/api/student/my-courses",
+            {
+              withCredentials: true,
+            }
+          );
+          const enrolledIds = res.data.coursesWithProgress?.map((c) => c._id);
+          setEnrolledCourses(enrolledIds || []);
+        } catch (err) {
+          console.error("Failed to fetch enrolled courses", err);
+          setEnrolledCourses([]);
+        }
+      } else {
+        setEnrolledCourses([]);
+      }
+    };
+
+    fetchEnrolledCourses();
+  }, [user]);
+
   const handleEnroll = async (courseId) => {
     if (!user) {
       toast.error("Please register or login to enroll in a course.");
@@ -102,7 +126,7 @@ export default function Home() {
               Explore What Professionals Like You Are Learning The Most
             </h1>
             <Link to="/courses" className="hero-button">
-              Visit Courses
+              View All Courses
             </Link>
           </div>
         </div>
@@ -114,7 +138,7 @@ export default function Home() {
           <h2 className="section-title">Popular Courses</h2>
           <div className="courses-grid">
             {filteredCourses.length > 0 ? (
-              filteredCourses.map((course) => (
+              filteredCourses.slice(0, 4).map((course) => (
                 <div key={course._id} className="course-card">
                   <img
                     src={
@@ -136,15 +160,18 @@ export default function Home() {
                       ⭐ {course.rating.toFixed(1)} ({course.reviews.length}{" "}
                       reviews)
                     </div>
-                    <button
-                      className="enroll-button"
-                      onClick={() => handleEnroll(course._id)}
-                      disabled={enrolledCourses.includes(course._id)}
-                    >
-                      {enrolledCourses.includes(course._id)
-                        ? "Enrolled"
-                        : "Enroll"}
-                    </button>
+                    {enrolledCourses.includes(course._id) ? (
+                      <Link to={`/student/course-content/${course._id}`}>
+                        <button className="enroll-button">View Course</button>
+                      </Link>
+                    ) : (
+                      <button
+                        className="enroll-button"
+                        onClick={() => handleEnroll(course._id)}
+                      >
+                        Enroll
+                      </button>
+                    )}
                   </div>
                 </div>
               ))
@@ -179,6 +206,8 @@ export default function Home() {
       </section>
 
       <style>{`
+      
+
         .search-container {
           display: flex;
           align-items: center;
@@ -229,8 +258,8 @@ export default function Home() {
 
         .courses-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 20px;
+  grid-template-columns: repeat(4, 1fr); /* 4 fixed columns */
+  gap: 20px;
         }
 
         .course-card {
@@ -291,6 +320,24 @@ export default function Home() {
           font-size: 14px;
           color: #777;
         }
+
+        .view-course-button {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 15px;
+  background-color: #00796b;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.view-course-button:hover {
+  background-color: #1565c0;
+}
       `}</style>
     </>
   );

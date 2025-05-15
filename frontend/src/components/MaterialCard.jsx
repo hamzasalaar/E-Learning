@@ -1,8 +1,4 @@
 // Refactored CourseContent UI with improved styling and icons
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { toast } from "react-hot-toast";
 import { FaEdit, FaTrash, FaDownload, FaLink } from "react-icons/fa";
 
 const MaterialCard = ({ mat, onEdit, onDelete }) => {
@@ -10,8 +6,7 @@ const MaterialCard = ({ mat, onEdit, onDelete }) => {
     <div className="material-card">
       <h4>{mat.title}</h4>
       <span className={`material-badge type-${mat.type}`}>
-        Type :{" "}
-        {mat.type.toUpperCase()}
+        Type : {mat.type.toUpperCase()}
       </span>
       {mat.dueDate && <p>Due: {new Date(mat.dueDate).toLocaleString()}</p>}
       <div className="material-actions">
@@ -75,10 +70,10 @@ const CourseContentStyles = `
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 12px;
-  background-color: #4f46e5;
-  color: white;
-  border: none;
+  padding: 4px 10px;
+  background-color:rgb(255, 255, 255);
+  color: black;
+  border: 1px solid #ddd;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
@@ -87,11 +82,11 @@ const CourseContentStyles = `
 }
 
 .icon-button:hover {
-  background-color: #4338ca;
+  background-color:#d0d0d0;
 }
 
-.icon-button.danger {
-  background-color: #dc2626;
+.icon-button.danger {;
+  background-color:rgb(146, 146, 146);
 }
 
 .icon-button.danger:hover {
@@ -108,11 +103,13 @@ const CourseContentStyles = `
   font-weight: 600;
 }
 
-.type-assignment { background: #fef3c7; color: #92400e; }
-.type-video { background: #dbeafe; color: #1e40af; }
-.type-reading { background: #fce7f3; color: #9d174d; }
-.type-lecture { background: #e0f2fe; color: #0369a1; }
-.type-quiz { background: #ede9fe; color: #5b21b6; }
+
+
+.type-assignment { background: #rgb(222, 222, 222); color: #92400e; }
+.type-video { background: rgb(222, 222, 222); color: #1e40af; }
+.type-reading { background: rgb(222, 222, 222); color: #9d174d; }
+.type-lecture { background: rgb(222, 222, 222); color: #0369a1; }
+.type-quiz { background: rgb(222, 222, 222); color: #5b21b6; }
 `;
 
 export { MaterialCard, CourseContentStyles };

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { FaPlay, FaChevronDown, FaChevronRight } from "react-icons/fa";
 import { toast } from "react-hot-toast";
+import MaterialForm from "../components/MaterialForm";
 import { MaterialCard, CourseContentStyles } from "../components/MaterialCard";
 import "../css/CourseContent.css"; // Assuming you have a CSS file for styles
 
@@ -20,6 +22,13 @@ const CourseContent = () => {
     imageUrl: "",
     videoUrl: "",
   });
+  const [liveSessions, setLiveSessions] = useState([]);
+  const [newSession, setNewSession] = useState({
+    title: "",
+    description: "",
+    startTime: "",
+    duration: 60,
+  });
 
   const [newMaterial, setNewMaterial] = useState({
     title: "",
@@ -30,9 +39,17 @@ const CourseContent = () => {
     instructions: "",
   });
 
+  const [showMaterials, setShowMaterials] = useState(true);
+  const [showSessions, setShowSessions] = useState(true);
+  const [showReviews, setShowReviews] = useState(true);
+
+  const [showSessionForm, setShowSessionForm] = useState(false);
+  const [showMaterialForm, setShowMaterialForm] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [materialId, setmaterialId] = useState(null);
+  const [materialId, setMaterialId] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [sessionRecordings, setSessionRecordings] = useState([]);
+  const [selectedMeetingId, setSelectedMeetingId] = useState(null);
 
   useEffect(() => {
     const fetchCourseAndMaterials = async () => {
@@ -131,7 +148,7 @@ const CourseContent = () => {
         instructions: "",
       });
       setEditMode(false);
-      setmaterialId(null);
+      setMaterialId(null);
       setUploadProgress(0);
     } catch (err) {
       toast.error("Failed to submit material.");
@@ -148,7 +165,7 @@ const CourseContent = () => {
       instructions: material.instructions || "",
     });
     setEditMode(true);
-    setmaterialId(material._id);
+    setMaterialId(material._id);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -217,6 +234,65 @@ const CourseContent = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchLiveSessions = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:3000/api/teacher/course/${courseId}/sessions`,
+          {
+            withCredentials: true,
+          }
+        );
+        setLiveSessions(res.data.sessions || []);
+      } catch (err) {
+        console.error("Error loading sessions", err);
+      }
+    };
+
+    fetchLiveSessions();
+  }, [courseId]);
+
+  const handleDeleteSession = async (sessionId) => {
+    if (!window.confirm("Are you sure you want to delete this session?"))
+      return;
+    try {
+      await axios.delete(
+        `http://localhost:3000/api/teacher/session/${sessionId}`,
+        {
+          withCredentials: true,
+        }
+      );
+      toast.success("Session deleted successfully.");
+      setLiveSessions((prev) => prev.filter((s) => s._id !== sessionId));
+    } catch (err) {
+      console.error("Failed to delete session", err);
+      toast.error("Could not delete session.");
+    }
+  };
+
+  const handleSessionClick = async (meetingID) => {
+    if (selectedMeetingId === meetingID) {
+      // collapse if already selected
+      setSelectedMeetingId(null);
+      setSessionRecordings([]);
+      return;
+    }
+
+    try {
+      const res = await axios.get(
+        `http://localhost:3000/api/teacher/recordings/${meetingID}`,
+        {
+          withCredentials: true,
+        }
+      );
+      setSessionRecordings(res.data.recordings || []);
+      setSelectedMeetingId(meetingID);
+    } catch (err) {
+      console.error("Failed to fetch session recordings:", err);
+      toast.error("Could not load recordings for this session.");
+    }
+  };
+
   if (loading) return <p style={{ textAlign: "center" }}>Loading...</p>;
   if (error)
     return <p style={{ color: "red", textAlign: "center" }}>{error}</p>;
@@ -265,16 +341,7 @@ const CourseContent = () => {
         </div>
       </header>
       {showCourseEdit && (
-        <form
-          onSubmit={handleCourseUpdate}
-          className="update-course-form"
-          style={{
-            marginTop: "20px",
-            background: "#f9f9f9",
-            padding: "20px",
-            borderRadius: "8px",
-          }}
-        >
+        <form onSubmit={handleCourseUpdate} className="update-course-form">
           <h3>Edit Course Info</h3>
           <input
             type="text"
@@ -324,173 +391,262 @@ const CourseContent = () => {
         </form>
       )}
 
-      <section className="materials-section">
-        <h2>{editMode ? "Edit Material" : "Add New Material"}</h2>
-        <form onSubmit={handleMaterialSubmit} className="material-form">
-          <div className="form-group">
-            <label>Title</label>
-            <input
-              type="text"
-              value={newMaterial.title}
-              onChange={(e) =>
-                setNewMaterial({ ...newMaterial, title: e.target.value })
-              }
-              required
-            />
-          </div>
+      <section className="materials-section collapsible-section">
+        <h2
+          style={{ cursor: "pointer" }}
+          onClick={() => setShowMaterials((prev) => !prev)}
+        >
+          Course Content{" "}
+          {showMaterials ? <FaChevronDown /> : <FaChevronRight />}
+        </h2>
 
-          <div className="form-group">
-            <label>Type</label>
-            <select
-              value={newMaterial.type}
-              onChange={(e) =>
-                setNewMaterial({ ...newMaterial, type: e.target.value })
-              }
-            >
-              <option value="lecture">Lecture</option>
-              <option value="video">Video</option>
-              <option value="reading">Reading</option>
-              <option value="assignment">Assignment</option>
-              <option value="quiz">Quiz</option>
-            </select>
-          </div>
-
-          {newMaterial.type === "video" && (
-            <div className="form-group">
-              <label>Video URL</label>
-              <input
-                type="url"
-                value={newMaterial.url}
-                onChange={(e) =>
-                  setNewMaterial({ ...newMaterial, url: e.target.value })
-                }
-              />
-            </div>
-          )}
-
-          {newMaterial.type === "assignment" && (
-            <>
-              <div className="form-group">
-                <label>Instructions</label>
-                <textarea
-                  value={newMaterial.instructions}
-                  onChange={(e) =>
-                    setNewMaterial({
-                      ...newMaterial,
-                      instructions: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div className="form-group">
-                <label>Due Date</label>
-                <input
-                  type="datetime-local"
-                  value={newMaterial.dueDate}
-                  onChange={(e) =>
-                    setNewMaterial({ ...newMaterial, dueDate: e.target.value })
-                  }
-                />
-              </div>
-            </>
-          )}
-
-          {newMaterial.type !== "video" && (
-            <div className="form-group">
-              <label>Upload File</label>
-              <input
-                type="file"
-                name="files"
-                accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt"
-                multiple
-                onChange={handleFileChange}
-              />
-            </div>
-          )}
-          {newMaterial.file.length > 0 && (
-            <ul className="file-preview-list">
-              {newMaterial.file.map((file, index) => (
-                <li key={index} className="file-preview-item">
-                  📄 {file.name}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveFile(index)}
-                    className="remove-file-btn"
-                  >
-                    ✖
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <div className="form-actions">
-            <button type="submit">
-              {editMode ? "Update" : "Add"} Material
+        {showMaterials && (
+          <>
+            {/* Add New Material Button & Form */}
+            <button className="add-material-btn" onClick={() => setShowMaterialForm((prev) => !prev)}>
+              {showMaterialForm ? "Hide" : "Add New Material"}
             </button>
-            {editMode && (
-              <button
-                type="button"
-                onClick={() => {
-                  setEditMode(false);
-                  setNewMaterial({
-                    title: "",
-                    type: "lecture",
-                    url: "",
-                    file: [],
-                    dueDate: "",
-                    instructions: "",
-                  });
-                }}
-              >
-                Cancel
-              </button>
-            )}
-          </div>
 
-          {uploadProgress > 0 && (
-            <p style={{ marginTop: "10px" }}>Upload: {uploadProgress}%</p>
-          )}
-        </form>
-
-        <h2 style={{ marginTop: "40px" }}>Course Materials</h2>
-        {materials.length === 0 ? (
-          <p style={{ textAlign: "center", color: "#888" }}>
-            No materials added yet. Use the form above to get started.
-          </p>
-        ) : (
-          <div className="materials-grid">
-            {materials.map((mat) => (
-              <MaterialCard
-                key={mat._id}
-                mat={mat}
-                onEdit={handleEditMaterial}
-                onDelete={handleDeleteMaterial}
+            {showMaterialForm && (
+              <MaterialForm
+                mode="add"
+                newMaterial={newMaterial}
+                setNewMaterial={setNewMaterial}
+                handleSubmit={handleMaterialSubmit}
+                handleRemoveFile={handleRemoveFile}
+                handleFileChange={handleFileChange}
+                uploadProgress={uploadProgress}
               />
-            ))}
-          </div>
+            )}
+
+            {/* Materials List */}
+            {materials.length === 0 ? (
+              <p style={{ textAlign: "center", color: "#888" }}>
+                No materials added yet. Use the form above to get started.
+              </p>
+            ) : (
+              <div className="materials-grid">
+                {materials.map((mat) => (
+                  <div key={mat._id}>
+                    <MaterialCard
+                      mat={mat}
+                      onEdit={() => handleEditMaterial(mat)}
+                      onDelete={handleDeleteMaterial}
+                    />
+
+                    {/* Inline Edit Form under the material */}
+                    {editMode && materialId === mat._id && (
+                      <MaterialForm
+                        mode="edit"
+                        newMaterial={newMaterial}
+                        setNewMaterial={setNewMaterial}
+                        handleSubmit={handleMaterialSubmit}
+                        handleRemoveFile={handleRemoveFile}
+                        handleFileChange={handleFileChange}
+                        uploadProgress={uploadProgress}
+                        handleCancel={() => {
+                          setEditMode(false);
+                          setMaterialId(null);
+                          setNewMaterial({
+                            title: "",
+                            type: "lecture",
+                            url: "",
+                            file: [],
+                            dueDate: "",
+                            instructions: "",
+                          });
+                        }}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </section>
-      <section className="reviews-section">
-        <h2>Course Reviews</h2>
-        {course.reviews?.length === 0 ? (
-          <p style={{ textAlign: "center", color: "#888" }}>No reviews yet.</p>
-        ) : (
-          <div className="reviews-list">
-            {course.reviews.map((review) => (
-              <div key={review._id} className="review-card">
-                <p>
-                  <strong>{review.user?.name || "Anonymous"}:</strong>{" "}
-                  <span>⭐ {review.rating}</span>
-                </p>
-                <p>{review.comment}</p>
-                <small>
-                  {new Date(review.createdAt).toLocaleString()} |{" "}
-                  {review.user?.email}
-                </small>
+
+      <section className="live-session-section collapsible-section">
+        <h2
+          style={{ cursor: "pointer" }}
+          onClick={() => setShowSessions((prev) => !prev)}
+        >
+          Live Sessions {showSessions ? <FaChevronDown /> : <FaChevronRight />}
+        </h2>
+        {showSessions && (
+          <>
+            <h3>Add New Session</h3>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                try {
+                  const res = await axios.post(
+                    `http://localhost:3000/api/teacher/session/${courseId}`,
+                    newSession,
+                    {
+                      withCredentials: true,
+                    }
+                  );
+                  toast.success("Live session created!");
+                  setLiveSessions((prev) => [...prev, res.data.session]);
+                  setNewSession({
+                    title: "",
+                    description: "",
+                    startTime: "",
+                    duration: 60,
+                  });
+                } catch (err) {
+                  toast.error("Failed to create session");
+                }
+              }}
+              className="live-session-form"
+            >
+              <input
+                type="text"
+                placeholder="Session Title"
+                value={newSession.title}
+                onChange={(e) =>
+                  setNewSession({ ...newSession, title: e.target.value })
+                }
+                required
+              />
+              <textarea
+                placeholder="Description"
+                value={newSession.description}
+                onChange={(e) =>
+                  setNewSession({ ...newSession, description: e.target.value })
+                }
+              />
+              <input
+                type="datetime-local"
+                value={newSession.startTime}
+                onChange={(e) =>
+                  setNewSession({ ...newSession, startTime: e.target.value })
+                }
+                required
+              />
+              <input
+                type="number"
+                placeholder="Duration (min)"
+                value={newSession.duration}
+                onChange={(e) =>
+                  setNewSession({ ...newSession, duration: e.target.value })
+                }
+              />
+              <button type="submit">Create Session</button>
+            </form>
+            {liveSessions.length === 0 ? (
+              <p>No sessions yet.</p>
+            ) : (
+              <ul className="session-list">
+                {liveSessions.map((session) => (
+                  <li key={session._id} className="session-item">
+                    <div
+                      onClick={() => handleSessionClick(session.meetingID)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <strong>{session.title}</strong> –{" "}
+                      {new Date(session.startTime).toLocaleString()}
+                      <p>{session.description}</p>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        try {
+                          const res = await axios.get(
+                            `http://localhost:3000/api/teacher/session/${session._id}/moderator-join`,
+                            { withCredentials: true }
+                          );
+                          window.open(res.data.url, "_blank");
+                        } catch (err) {
+                          toast.error("Unable to join session.");
+                        }
+                      }}
+                    >
+                      Join Session
+                    </button>
+                    <button
+                      onClick={() => handleDeleteSession(session._id)}
+                      style={{ backgroundColor: "#dc3545" }}
+                    >
+                      Delete
+                    </button>
+
+                    {selectedMeetingId === session.meetingID && (
+                      <div
+                        className="recordings-list"
+                        style={{ marginTop: "10px" }}
+                      >
+                        <h4>Recordings:</h4>
+                        {sessionRecordings.length === 0 ? (
+                          <p style={{ color: "#888" }}>
+                            No recordings available.
+                          </p>
+                        ) : (
+                          sessionRecordings.map((rec) => (
+                            <div key={rec.recordID} className="recording-card">
+                              <p>
+                                <strong>Start:</strong> {rec.startTime} <br />
+                                <strong>End:</strong> {rec.endTime}
+                              </p>
+                              {rec.playbackUrl ? (
+                                <a
+                                  href={rec.playbackUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="playback-link"
+                                >
+                                  <FaPlay style={{ marginRight: "5px" }} />
+                                  Watch Recording
+                                </a>
+                              ) : (
+                                <p style={{ color: "#aaa" }}>
+                                  Playback not available
+                                </p>
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
+        )}
+      </section>
+
+      <section className="reviews-section collapsible-section">
+        <h2
+          style={{ cursor: "pointer" }}
+          onClick={() => setShowReviews((prev) => !prev)}
+        >
+          Course Reviews {showReviews ? <FaChevronDown /> : <FaChevronRight />}
+        </h2>
+        {showReviews && (
+          <>
+            {course.reviews?.length === 0 ? (
+              <p style={{ textAlign: "center", color: "#888" }}>
+                No reviews yet.
+              </p>
+            ) : (
+              <div className="reviews-list">
+                {course.reviews.map((review) => (
+                  <div key={review._id} className="review-card">
+                    <p>
+                      <strong>{review.user?.name || "Anonymous"}:</strong>{" "}
+                      <span>⭐ {review.rating}</span>
+                    </p>
+                    <p>{review.comment}</p>
+                    <small>
+                      {new Date(review.createdAt).toLocaleString()} |{" "}
+                      {review.user?.email}
+                    </small>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </section>
 

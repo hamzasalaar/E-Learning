@@ -11,8 +11,9 @@ const enrollInCourse = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found!",})
-      }
+        message: "User not found!",
+      });
+    }
     const course = await Course.findById(courseId);
     if (!course) {
       return res
@@ -40,15 +41,21 @@ const enrollInCourse = async (req, res) => {
     course.studentsEnrolled.push(studentId);
     await course.save();
 
-    const progress = new Progress({
+    let progress = await Progress.findOne({
       student: studentId,
       course: courseId,
-      completed: false,
-      progressPercent: 0,
-      lastAccessed: Date.now(),
     });
-    await progress.save();
 
+    if (!progress) {
+      progress = new Progress({
+        student: studentId,
+        course: courseId,
+        completed: false,
+        progressPercent: 0,
+        lastAccessed: Date.now(),
+      });
+      await progress.save();
+    }
     res.status(200).json({
       success: true,
       message: "Enrolled successfully!",
@@ -162,6 +169,7 @@ const unenrollFromCourse = async (req, res) => {
     );
 
     await course.save();
+    await Progress.deleteOne({ student: studentId, course: courseId });
 
     res.status(200).json({
       success: true,
@@ -177,7 +185,7 @@ const createReview = async (req, res) => {
   try {
     const { courseId } = req.params;
     const { rating, comment } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.id.toString();
 
     // Validate rating
     if (!rating || rating < 1 || rating > 5) {
@@ -187,7 +195,9 @@ const createReview = async (req, res) => {
       });
     }
 
-    const course = await Course.findById(courseId);
+    const course = await Course.findById(courseId)
+      .populate("teacher", "name email")
+      .populate("reviews.user", "name email");
 
     if (!course) {
       return res.status(404).json({
@@ -206,8 +216,11 @@ const createReview = async (req, res) => {
 
     // Check if the user already left a review
     const existingReview = course.reviews.find(
-      (r) => r.user.toString() === userId
+      (r) =>
+        r.user?._id?.toString() === userId || // if populated
+        r.user?.toString() === userId // if just an ObjectId
     );
+
     if (existingReview) {
       return res.status(400).json({
         success: false,
@@ -232,7 +245,8 @@ const createReview = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Review submitted successfully",
-      course,
+      reviews: course.reviews,
+      rating: course.rating,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -390,9 +404,10 @@ const getCourseDetails = async (req, res) => {
       _id: courseId,
       studentsEnrolled: studentId,
     })
-      .select("-reviews -status -rejectionReason")
+      .select("-status -rejectionReason")
       .populate("teacher", "name email")
-      .populate("studentsEnrolled", "name email");
+      .populate("studentsEnrolled", "name email")
+      .populate("reviews.user", "name email");
 
     if (!course) {
       return res.status(404).json({
@@ -401,35 +416,15 @@ const getCourseDetails = async (req, res) => {
       });
     }
 
-    const progress = await Progress.findOne({
-      student: studentId,
-      course: courseId,
-    });
-
-    const courseWithProgress = {
-      ...course.toObject(),
-      progress: progress
-        ? {
-            completedLectures: progress.completedLectures,
-            totalLectures: progress.totalLectures,
-            percentage: Math.round(
-              (progress.completedLectures / progress.totalLectures) * 100
-            ),
-          }
-        : {
-            completedLectures: 0,
-            totalLectures: 0,
-            percentage: 0,
-          },
-    };
     res.status(200).json({
       success: true,
-      course: courseWithProgress,
+      course: course.toObject(), // always safer for frontend
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 module.exports = {
   enrollInCourse,
   getEnrolledCourses,

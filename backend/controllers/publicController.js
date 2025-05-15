@@ -5,8 +5,7 @@ const publicCourses = async (req, res) => {
   try {
     const courses = await CourseModel.find({ status: "approved" })
       .populate("teacher", "name email")
-      .sort({ rating: -1 }) // show top-rated
-      .limit(6);
+      .sort({ rating: -1 }); // show top-rated
 
     const uniqueTeacherIds = [
       ...new Set(courses.map((course) => course.teacher._id.toString())),

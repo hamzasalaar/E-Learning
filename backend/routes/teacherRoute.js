@@ -33,6 +33,16 @@ const {
 } = require("../controllers/notificationController");
 const { updateUserProfile } = require("../controllers/studentController");
 const uploadImage = require("../utils/uploadImage");
+const {
+  createLiveSession,
+  getLiveSessionsByCourse,
+  isSessionRunning,
+  cancelSession,
+  joinLiveSession,
+  moderatorJoinSession,
+  deleteSession,
+  getRecordings,
+} = require("../controllers/liveSessionController");
 
 const TeacherRoute = express.Router();
 
@@ -71,6 +81,16 @@ TeacherRoute.put(
   updateMaterial
 );
 TeacherRoute.delete("/courses/:courseId/materials/:materialId", deleteMaterial);
+
+//LiveSession Routes
+
+TeacherRoute.post("/session/:courseId", createLiveSession);
+TeacherRoute.get("/session/:sessionId/moderator-join", moderatorJoinSession);
+TeacherRoute.get("/course/:courseId/sessions", getLiveSessionsByCourse);
+TeacherRoute.get("/session/:sessionId/status", isSessionRunning);
+TeacherRoute.delete("/session/:sessionId", cancelSession);
+TeacherRoute.delete("/session/:sessionId", deleteSession);
+TeacherRoute.get("/recordings/:meetingID", getRecordings);
 
 // ✅ Routes for Notifications
 // must be after isAuthenticated middleware
