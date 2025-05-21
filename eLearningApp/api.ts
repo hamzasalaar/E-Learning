@@ -1,9 +1,13 @@
 // api.js
 import axios from "axios";
 
+// 🔧 Extract the root host separately (no `/api`)
+export const BASE_URL = "http://172.20.22.121:3000"; // Only root, for images
+export const API_URL = `${BASE_URL}/api`;           // Full API path
+
 const API = axios.create({
-  baseURL: "http://192.168.3.147:3000/api", // Replace with your backend IP
-  withCredentials: true, // 🔥 This enables cookies!
-});
+  baseURL: API_URL,
+  withCredentials: true,
+});   
 
 export default API;

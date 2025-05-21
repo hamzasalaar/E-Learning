@@ -1,7 +1,11 @@
 // eLearningApp/components/StudentDrawerNavigator.tsx
 import React from "react";
 import { TouchableOpacity, Text } from "react-native";
-import { createDrawerNavigator, DrawerNavigationOptions } from "@react-navigation/drawer";
+import {
+  createDrawerNavigator,
+  DrawerNavigationOptions,
+} from "@react-navigation/drawer";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../redux/store";
 import { logoutUser } from "../redux/authSlice";
@@ -10,16 +14,14 @@ import HomeScreen from "../screens/HomeScreen";
 import ProfileScreen from "../screens/StudentProfile";
 import MyCoursesScreen from "../screens/MyCoursesScreen";
 import NotificationScreen from "../screens/NotificationScreen";
+import StudentCourseContent from "../screens/StudentCourseContent";
 import CustomDrawer from "./CustomDrawer";
 
 const Drawer = createDrawerNavigator();
+const Stack = createNativeStackNavigator();
 
-export default function StudentDrawerNavigator() {
-  const user = useSelector((state: RootState) => state.auth.user);
+function StudentDrawerScreens() {
   const dispatch = useDispatch<AppDispatch>();
-
-  // Only allow access if the user is a student
-  if (!user || user.role !== "student") return null;
 
   const headerOptionsWithLogout: DrawerNavigationOptions = {
     headerShown: true,
@@ -42,7 +44,7 @@ export default function StudentDrawerNavigator() {
       <Drawer.Screen
         name="Home"
         component={HomeScreen}
-        options={{ headerShown: false }} // Hide top bar on Home
+        options={{ headerShown: false }}
       />
       <Drawer.Screen
         name="My Courses"
@@ -60,5 +62,22 @@ export default function StudentDrawerNavigator() {
         options={{ ...headerOptionsWithLogout, title: "Notifications" }}
       />
     </Drawer.Navigator>
+  );
+}
+
+export default function StudentDrawerNavigator() {
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  if (!user || user.role !== "student") return null;
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }} id={undefined}>
+      <Stack.Screen name="StudentDrawer" component={StudentDrawerScreens} />
+      <Stack.Screen
+        name="StudentCourseContent"
+        component={StudentCourseContent}
+        options={{ headerShown: true, title: "Course Content" }}
+      />
+    </Stack.Navigator>
   );
 }

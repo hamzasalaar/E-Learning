@@ -7,11 +7,13 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
-  Alert,
 } from "react-native";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
-import api from "../api";
+import api, { BASE_URL } from "../api";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../types/navigation";
 
 export default function MyCoursesScreen() {
   const [courses, setCourses] = useState<any[]>([]);
@@ -19,6 +21,7 @@ export default function MyCoursesScreen() {
   const [error, setError] = useState("");
 
   const user = useSelector((state: RootState) => state.auth.user);
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList, "Home">>();
 
   const fetchCourses = async () => {
     if (!user) return;
@@ -44,8 +47,13 @@ export default function MyCoursesScreen() {
 
   const renderCourse = ({ item }: { item: any }) => (
     <View style={styles.card}>
-      <Image source={{ uri: item.imageUrl }} style={styles.image} />
-      <Text style={styles.title}>{item.title}</Text>
+      <Image
+        source={{ uri: `${BASE_URL}${item.imageUrl}` }}
+        style={styles.image}
+        resizeMode="cover"
+        onError={(e) => console.log("Image load error", e.nativeEvent.error)}
+      />
+      <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">{item.title}</Text>
       {user.role === "teacher" && (
         <Text style={styles.detail}>Status: {item.status}</Text>
       )}
@@ -58,7 +66,11 @@ export default function MyCoursesScreen() {
       <TouchableOpacity
         style={styles.button}
         onPress={() => {
-          Alert.alert("Course Clicked", `Course: ${item.title}`);
+          if (user.role === "student") {
+            navigation.navigate("StudentCourseContent", { courseId: item._id });
+          } else {
+            // For teachers you can define another screen if needed
+          }
         }}
       >
         <Text style={styles.buttonText}>View Details</Text>
@@ -111,6 +123,7 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 8,
     marginBottom: 10,
+    backgroundColor: "#eee",
   },
   title: {
     fontSize: 16,

@@ -8,26 +8,41 @@ import {
   Alert,
   ScrollView,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
+import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import api from "../api";
 
 export default function AddCourseScreen() {
   const navigation = useNavigation<any>();
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     videoUrl: "",
     price: "",
-    imageUrl: "",
   });
 
+  const [image, setImage] = useState<any>(null);
   const [lectureNotes, setLectureNotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (key: string, value: string) => {
     setFormData({ ...formData, [key]: value });
+  };
+
+  const handlePickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
+      allowsEditing: true,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0]);
+    }
   };
 
   const handleFilePick = async () => {
@@ -42,8 +57,8 @@ export default function AddCourseScreen() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.title || !formData.description || !formData.price || !formData.imageUrl) {
-      return Alert.alert("Error", "Please fill in all required fields.");
+    if (!formData.title || !formData.description || !formData.price || !image) {
+      return Alert.alert("Error", "Please fill in all required fields including course image.");
     }
 
     try {
@@ -54,10 +69,16 @@ export default function AddCourseScreen() {
         data.append(key, value.toString())
       );
 
+      data.append("image", {
+        uri: image.uri,
+        name: image.fileName || "thumbnail.jpg",
+        type: image.type || "image/jpeg",
+      } as any);
+
       lectureNotes.forEach((file, index) => {
         data.append("lectureNotes", {
           uri: file.uri,
-          name: file.name || `file-${index}.pdf`,
+          name: file.name || `note-${index}.pdf`,
           type: "application/pdf",
         } as any);
       });
@@ -75,7 +96,7 @@ export default function AddCourseScreen() {
           courseId: res.data.course._id,
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error(error);
       Alert.alert("Error", "Failed to add course.");
     } finally {
@@ -87,21 +108,23 @@ export default function AddCourseScreen() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.heading}>Add a New Course</Text>
 
-      {["title", "description", "imageUrl", "videoUrl", "price"].map((field, i) => (
+      {["title", "description", "videoUrl", "price"].map((field, i) => (
         <TextInput
           key={i}
           style={styles.input}
-          placeholder={field === "imageUrl" ? "PostImage URL" : field.charAt(0).toUpperCase() + field.slice(1)}
-          value={formData[field]}
+          placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+          value={(formData as any)[field]}
           keyboardType={field === "price" ? "numeric" : "default"}
           onChangeText={(text) => handleChange(field, text)}
           multiline={field === "description"}
         />
       ))}
 
-      <TouchableOpacity style={styles.uploadBtn} onPress={handleFilePick}>
-        <Text style={styles.uploadText}>Select Lecture Notes (PDF)</Text>
-        <Text style={styles.notesInfo}>{lectureNotes.length} file(s) selected</Text>
+      <TouchableOpacity style={styles.uploadBtn} onPress={handlePickImage}>
+        <Text style={styles.uploadText}>
+          {image ? "Change Course Image" : "Select Course Image"}
+        </Text>
+        {image && <Image source={{ uri: image.uri }} style={styles.imagePreview} />}
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
@@ -147,6 +170,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#666",
     marginTop: 4,
+  },
+  imagePreview: {
+    width: 150,
+    height: 150,
+    borderRadius: 8,
+    marginTop: 10,
   },
   button: {
     backgroundColor: "#008080",
