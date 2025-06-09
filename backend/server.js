@@ -23,14 +23,15 @@ const allowedOrigins = [
   "http://192.168.3.147:8081", // Expo Dev Tools
   "http://192.168.3.147:19006", // Expo Go app
   "http://localhost:8081",
-  "https://frontend-bz16.onrender.com/", // Production frontend URL
+  "https://frontend-bz16.onrender.com", // Production frontend URL
 ];
 
 // CORS middleware with debug logging
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) {
+      console.log(`CORS request from origin: ${origin}`);
+      if (!origin || origin === "null") {
         // Mobile apps (like Expo Go) often have no origin – allow it
         return callback(null, true);
       }
