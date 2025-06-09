@@ -12,14 +12,14 @@ const Footer = () => {
             <div>
               <Link to="/about">About Us</Link>
               <Link to="/contact">Contact Us</Link>
-              <Link to="/careers">Careers</Link>
-              <Link to="/blog">Blog</Link>
+              {/* <Link to="/careers">Careers</Link>
+              <Link to="/blog">Blog</Link> */}
             </div>
-            <div>
+            {/* <div>
               <Link to="/udemy-business">Udemy Business</Link>
               <Link to="/teach">Teach On Udemy</Link>
               <Link to="/app">Get The App</Link>
-            </div>
+            </div> */}
             <div>
               <Link to="/help">Help & Support</Link>
               <Link to="/privacy">Privacy Policy</Link>

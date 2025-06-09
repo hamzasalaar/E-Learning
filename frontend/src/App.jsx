@@ -40,6 +40,8 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/courses" element={<PublicCourses />} />
+          <Route path="course-details/:courseId" element={<CourseDetails />} />
+
           <Route path="/About" element={<About />} />
           <Route path="/Contact" element={<Contact />} />
           <Route path="/Tutors" element={<AllTeachers />} />
@@ -56,7 +58,6 @@ export default function App() {
         <Route path="/teacher" element={<TeacherLayout />}>
           <Route path="dashboard" element={<TeacherDashboard />} />
           <Route path="addcourse" element={<AddCourse />} />
-          <Route path="course-details" element={<CourseDetails />} />
           <Route path="teacher-courses" element={<TeacherCourses />} />
           <Route path="courses/:courseId" element={<CourseContent />} />
           <Route path="profile" element={<TeacherProfile />} />

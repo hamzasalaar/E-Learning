@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { FaDownload, FaLink, FaCheckCircle } from "react-icons/fa";
@@ -21,6 +22,11 @@ export default function StudentCourseContent() {
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(5);
   const [hasReviewed, setHasReviewed] = useState(false);
+  const [editingReviewId, setEditingReviewId] = useState(null);
+  const [editedRating, setEditedRating] = useState(5);
+  const [editedComment, setEditedComment] = useState("");
+
+  const user = useSelector((state) => state.Auth.user);
 
   const handleUnenroll = () => {
     confirmAlert({
@@ -78,6 +84,11 @@ export default function StudentCourseContent() {
         ]);
 
         setCourse(courseRes.data.course);
+        const alreadyReviewed = courseRes.data.course.reviews?.some(
+          (r) => r.user?._id === user?._id
+        );
+        setHasReviewed(alreadyReviewed);
+
         setMaterials(materialsRes.data.materials);
         setSessions(sessionsRes.data.sessions || []);
       } catch (err) {
@@ -124,6 +135,74 @@ export default function StudentCourseContent() {
     } catch (err) {
       console.error("Failed to fetch recordings:", err);
       alert("Could not load recordings for this session.");
+    }
+  };
+  const handleDelete = async (reviewId) => {
+    try {
+      await axios.delete(
+        `http://localhost:3000/api/student/review/${courseId}`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      toast.success("Review deleted!");
+      setCourse((prev) => ({
+        ...prev,
+        reviews: prev.reviews.filter((r) => r._id !== reviewId),
+      }));
+      setHasReviewed(false);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete review.");
+    }
+  };
+  const confirmDelete = (reviewId) => {
+    confirmAlert({
+      title: "Confirm Delete",
+      message:
+        "Are you sure you want to delete your review? This action cannot be undone.",
+      buttons: [
+        {
+          label: "Yes, Delete",
+          onClick: () => handleDelete(reviewId),
+        },
+        {
+          label: "Cancel",
+          onClick: () => {}, // no-op
+        },
+      ],
+    });
+  };
+
+  const handleEdit = (review) => {
+    setEditingReviewId(review._id);
+    setEditedRating(review.rating);
+    setEditedComment(review.comment);
+  };
+
+  const handleUpdate = async (reviewId) => {
+    try {
+      await axios.put(
+        `http://localhost:3000/api/student/review/${courseId}`,
+        {
+          rating: editedRating,
+          comment: editedComment,
+        },
+        { withCredentials: true }
+      );
+
+      toast.success("Review updated!");
+      setCourse((prev) => ({
+        ...prev,
+        reviews: prev.reviews.map((r) =>
+          r._id === reviewId
+            ? { ...r, rating: editedRating, comment: editedComment }
+            : r
+        ),
+      }));
+      setEditingReviewId(null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update review.");
     }
   };
 
@@ -318,18 +397,19 @@ export default function StudentCourseContent() {
                 toast.success("Review submitted!");
                 setHasReviewed(true);
 
-                setCourse((prev) => ({
-                  ...prev,
-                  reviews: [
-                    ...prev.reviews,
-                    {
-                      user: { name: "You" }, // or get it from auth
-                      rating: reviewRating,
-                      comment: reviewText,
-                      createdAt: new Date().toISOString(),
-                    },
-                  ],
-                }));
+                const refreshed = await axios.get(
+                  `http://localhost:3000/api/student/courses/${courseId}`,
+                  { withCredentials: true }
+                );
+                setCourse(refreshed.data.course);
+                const reviewed = refreshed.data.course.reviews.some(
+                  (r) => r.user?._id === user?._id
+                );
+                setHasReviewed(reviewed);
+
+                // Optional reset form
+                setReviewRating(5);
+                setReviewText("");
               } catch (err) {
                 toast.error(
                   err.response?.data?.message || "Failed to submit review."
@@ -372,16 +452,62 @@ export default function StudentCourseContent() {
         <h3 className="section-heading">Student Reviews</h3>
 
         {Array.isArray(course?.reviews) && course.reviews.length > 0 ? (
-          course.reviews.map((review, index) => (
-            <div key={index} className="review-card">
-              <p>
-                <strong>{review.user?.name || "Anonymous"}</strong> – ⭐
-                {review.rating}
-              </p>
-              <p>{review.comment}</p>
-              <small>{new Date(review.createdAt).toLocaleString()}</small>
-            </div>
-          ))
+          course.reviews.map((review, index) => {
+            const isOwner =
+              review.user?._id?.toString() === user?.id?.toString();
+
+            const isEditing = editingReviewId === review._id;
+
+            return (
+              <div key={index} className="review-card">
+                <p>
+                  <strong>
+                    {review.user?.name || "Anonymous"}{" "}
+                    {isOwner && <span className="you-tag"><i>(You)</i></span>}
+                  </strong>
+                  – {review.rating} ⭐
+                </p>
+
+                {isEditing ? (
+                  <>
+                    <select
+                      value={editedRating}
+                      onChange={(e) => setEditedRating(Number(e.target.value))}
+                    >
+                      {[5, 4, 3, 2, 1].map((r) => (
+                        <option key={r} value={r}>
+                          {r} Star{r > 1 ? "s" : ""}
+                        </option>
+                      ))}
+                    </select>
+                    <textarea
+                      value={editedComment}
+                      onChange={(e) => setEditedComment(e.target.value)}
+                    />
+                    <button onClick={() => handleUpdate(review._id)}>
+                      Save
+                    </button>
+                    <button onClick={() => setEditingReviewId(null)}>
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p>{review.comment}</p>
+                    <small>{new Date(review.createdAt).toLocaleString()}</small>
+                    {isOwner && (
+                      <div className="review-actions">
+                        <button onClick={() => handleEdit(review)}>Edit</button>
+                        <button onClick={() => confirmDelete(review._id)}>
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            );
+          })
         ) : (
           <p>No reviews yet.</p>
         )}

@@ -1,6 +1,7 @@
 const Course = require("../models/courseModel");
 const Progress = require("../models/progressModel");
 const User = require("../models/userModel");
+const bcrypt = require("bcryptjs");
 
 const enrollInCourse = async (req, res) => {
   try {
@@ -259,7 +260,10 @@ const updateReview = async (req, res) => {
     const { rating, comment } = req.body;
     const userId = req.user.id;
 
-    const course = await Course.findById(courseId);
+    const course = await Course.findById(courseId).populate(
+      "reviews.user",
+      "name _id"
+    );
 
     if (!course) {
       return res.status(404).json({
@@ -268,7 +272,9 @@ const updateReview = async (req, res) => {
       });
     }
 
-    const review = course.reviews.find((r) => r.user.toString() === userId);
+    const review = course.reviews.find(
+      (r) => r.user && r.user._id.toString() === userId
+    );
 
     if (!review) {
       return res.status(404).json({
@@ -361,36 +367,42 @@ const getStudentProfile = async (req, res) => {
 const updateUserProfile = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    const userId = req.user.id;
 
-    const student = await User.findById(req.user.id);
-    if (!student) {
+    const user = await User.findById(userId); // works for any role
+    if (!user) {
       return res
         .status(404)
-        .json({ success: false, message: "Student not found!" });
+        .json({ success: false, message: "User not found!" });
     }
 
     // Only update fields if provided
-    if (name) student.name = name;
-    if (email) student.email = email;
+    if (name) user.name = name;
+    if (email) user.email = email;
     if (password) {
-      const bcrypt = require("bcryptjs");
       const salt = await bcrypt.genSalt(10);
-      student.password = await bcrypt.hash(password, salt);
+      user.password = await bcrypt.hash(password, salt);
     }
 
-    await student.save();
+    if (req.file) {
+      user.picture = `/uploads/profilepics/${req.file.filename}`;
+    }
+
+    await user.save();
 
     res.status(200).json({
       success: true,
       message: "Profile updated successfully!",
-      student: {
-        id: student._id,
-        name: student.name,
-        email: student.email,
-        role: student.role,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        picture: user.picture,
       },
     });
   } catch (error) {
+    console.error("Update failed:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

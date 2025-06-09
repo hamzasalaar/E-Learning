@@ -230,3 +230,72 @@
   color: #777;
   font-size: 12px;
 }
+.review-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.review-actions button {
+  padding: 6px 12px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.review-actions button:first-child {
+  background-color: #4caf50; /* Edit: green */
+  color: white;
+}
+
+.review-actions button:first-child:hover {
+  background-color: #45a049;
+}
+
+.review-actions button:last-child {
+  background-color: #f44336; /* Delete: red */
+  color: white;
+}
+
+.review-actions button:last-child:hover {
+  background-color: #d32f2f;
+}
+.review-card select,
+.review-card textarea {
+  margin-top: 6px;
+  width: 100%;
+  padding: 6px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.review-card button {
+  margin-top: 6px;
+  margin-right: 8px;
+  padding: 6px 12px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.review-card button:nth-of-type(1) {
+  background-color: #2196f3; /* Save: blue */
+  color: white;
+}
+
+.review-card button:nth-of-type(1):hover {
+  background-color: #1976d2;
+}
+
+.review-card button:nth-of-type(2) {
+  background-color: #9e9e9e; /* Cancel: gray */
+  color: white;
+}
+
+.review-card button:nth-of-type(2):hover {
+  background-color: #757575;
+}

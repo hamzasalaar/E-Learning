@@ -1,3 +1,16 @@
+.delete-review-btn {
+  background-color: #666666;
+  color: white;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.delete-review-btn:hover {
+  background-color: #666666;
+}
 /* Admin.css */
 
 /* General Container */
@@ -418,4 +431,23 @@
   font-size: 14px;
   border: 1px solid #ccc;
   border-radius: 4px;
+}
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-active {
+  background-color: #e0f7e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.status-inactive {
+  background-color: #ffe0e0;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
 }

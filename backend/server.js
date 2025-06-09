@@ -16,16 +16,16 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// ✅ CORS Setup
+// CORS Setup
 const allowedOrigins = [
   "http://localhost:3001", // Web dev server
   "http://localhost:5173", // Vite or another dev frontend
-  "http://192.168.3.147:8081", // Expo Dev Tools (you might replace this)
-  "http://192.168.3.147:19006", // ✅ Most likely Expo Go app
+  "http://192.168.3.147:8081", // Expo Dev Tools
+  "http://192.168.3.147:19006", // Expo Go app
   "http://localhost:8081",
 ];
 
-// ✅ CORS middleware with debug logging
+// CORS middleware with debug logging
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -37,7 +37,7 @@ app.use(
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       } else {
-        console.error(`❌ Blocked by CORS: ${origin}`);
+        console.error(` Blocked by CORS: ${origin}`);
         return callback(new Error("Not allowed by CORS"));
       }
     },
@@ -45,7 +45,7 @@ app.use(
   })
 );
 
-// ✅ Middleware
+// Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -61,8 +61,8 @@ app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
-// ✅ Connect to DB and start server
+// Connect to DB and start server
 connectDB();
 app.listen(PORT, () => {
-  console.log(`✅ Server is running on http://localhost:${PORT}`);
+  console.log(` Server is running on http://localhost:${PORT}`);
 });

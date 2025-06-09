@@ -43,8 +43,9 @@ export default function AllTeachers() {
             <div key={teacher._id || index} className="teacher-card">
               <img
                 src={
-                  teacher.profilePicture ||
-                  "https://i.postimg.cc/9M3h9DGf/teacher-1.jpg"
+                  teacher.picture
+                    ? `http://localhost:3000${teacher.picture}`
+                    : "https://i.postimg.cc/9M3h9DGf/teacher-1.jpg"
                 }
                 alt={teacher.name}
                 className="teacher-img"

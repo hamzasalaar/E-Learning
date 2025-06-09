@@ -6,6 +6,7 @@ import { Logout } from "../redux/AuthSlice";
 import {
   FaUser,
   FaDollarSign,
+  FaBell,
   FaEnvelope,
   FaCog,
   FaMoneyCheckAlt,
@@ -14,7 +15,7 @@ import {
   FaBook,
 } from "react-icons/fa";
 
-export default function TeacherSidebar() {
+export default function TeacherSidebar({ collapsed, isOpen }) {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -39,12 +40,20 @@ export default function TeacherSidebar() {
   const isActive = (path) => location.pathname.startsWith(path);
 
   return (
-    <aside className="sidebar">
+    <aside
+      className={`sidebar ${collapsed ? "collapsed" : ""} ${
+        isOpen ? "open" : ""
+      }`}
+    >
       {/* User Info */}
       <div className="user-profile-top">
         <div className="user-info">
           <img
-            src={user?.profilePicture || "https://via.placeholder.com/60"}
+            src={
+              user?.picture
+                ? `http://localhost:3000${user.picture}`
+                : "https://via.placeholder.com/60"
+            }
             alt="Profile"
             className="profile-pic"
           />
@@ -63,7 +72,8 @@ export default function TeacherSidebar() {
             isActive("/teacher/dashboard") ? "active" : ""
           }`}
         >
-          <FaHome /> Dashboard
+          <FaHome />
+          <span className="menu-text">Dashboard</span>
         </Link>
         <Link
           to="/teacher/addcourse"
@@ -71,7 +81,8 @@ export default function TeacherSidebar() {
             isActive("/teacher/addcourse") ? "active" : ""
           }`}
         >
-          <FaChalkboardTeacher /> Add Course
+          <FaChalkboardTeacher />
+          <span className="menu-text">Add Course</span>
         </Link>
         <Link
           to="/teacher/teacher-courses"
@@ -79,19 +90,44 @@ export default function TeacherSidebar() {
             isActive("/teacher/teacher-courses") ? "active" : ""
           }`}
         >
-          <FaBook /> My Courses
+          <FaBook />
+          <span className="menu-text">My Courses</span>
         </Link>
-        <Link to="/teacher/students" className="menu-item">
-          <FaUser /> Students
+        <Link
+          to="/teacher/students"
+          className={`menu-item ${
+            isActive("/teacher/students") ? "active" : ""
+          }`}
+        >
+          <FaUser />
+          <span className="menu-text">Students</span>
         </Link>
-        <Link to="/teacher/notifications" className="menu-item">
-          <FaDollarSign /> Notifications
+        <Link
+          to="/teacher/notifications"
+          className={`menu-item ${
+            isActive("/teacher/notifications") ? "active" : ""
+          }`}
+        >
+          <FaBell />
+          <span className="menu-text">Notifications</span>
         </Link>
-        <Link to="#/teacher/settings" className="menu-item">
-          <FaCog /> Settings
-        </Link>
-        <Link to="#/teacher/payouts" className="menu-item">
-          <FaMoneyCheckAlt /> Payout Details
+        {/* <Link
+          to="/teacher/settings"
+          className={`menu-item ${
+            isActive("/teacher/settings") ? "active" : ""
+          }`}
+        >
+          <FaCog />
+          <span className="menu-text">Settings</span>
+        </Link> */}
+        <Link
+          to="/teacher/payouts"
+          className={`menu-item ${
+            isActive("/teacher/payouts") ? "active" : ""
+          }`}
+        >
+          <FaMoneyCheckAlt />
+          <span className="menu-text">Payout Details</span>
         </Link>
       </nav>
 
@@ -104,15 +140,44 @@ export default function TeacherSidebar() {
 
       <style>{`
         .sidebar {
-          width: 240px;
-          background-color: #1c1e2e;
-          color: white;
-          display: flex;
-          flex-direction: column;
-          padding: 20px;
-          flex-shrink: 0;
-          height: 100vh;
-        }
+  width: 240px;
+  background-color: #1c1e2e;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  height: 100vh;
+  position: relative;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+/* ✅ Collapsed Sidebar */
+.sidebar.collapsed {
+// display:none;
+  width: 70px;
+  padding: 20px 10px;
+    align-items: center;
+
+}
+
+.sidebar.collapsed .user-profile-top,
+.sidebar.collapsed .update-profile-button,
+.sidebar.collapsed .user-name,
+.sidebar.collapsed .logout-button {
+  display: none;
+}
+
+.sidebar.collapsed .menu-item {
+  justify-content: center;
+    padding: 12px 0;
+
+  font-size: 20px;
+}
+
+.sidebar.collapsed .menu-item > span {
+  display: none;
+}
 
         .user-profile-top {
           display: flex;
@@ -203,29 +268,25 @@ export default function TeacherSidebar() {
         }
 
         @media (max-width: 768px) {
-          .sidebar {
-            width: 100%;
-            flex-direction: row;
-            overflow-x: auto;
-            padding: 10px;
-            justify-content: space-around;
-            height: auto;
-          }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translateX(-100%);
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
+  }
 
-          .user-profile-top {
-            display: none;
-          }
+  .sidebar.open {
+    transform: translateX(0);
+  }
 
-          .menu {
-            flex-direction: row;
-            flex-wrap: wrap;
-            gap: 10px;
-          }
-
-          .logout-section {
-            margin-top: 0;
-          }
-        }
+  .main-content {
+    margin-left: 0 !important;
+  }
+    .sidebar.collapsed {
+    transform: translateX(-100%);
+  }
+}
       `}</style>
     </aside>
   );

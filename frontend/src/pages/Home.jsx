@@ -5,6 +5,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import CourseCard from "../components/CourseCard";
 
 export default function Home() {
   const [courses, setCourses] = useState([]);
@@ -138,43 +139,16 @@ export default function Home() {
           <h2 className="section-title">Popular Courses</h2>
           <div className="courses-grid">
             {filteredCourses.length > 0 ? (
-              filteredCourses.slice(0, 4).map((course) => (
-                <div key={course._id} className="course-card">
-                  <img
-                    src={
-                      `http://localhost:3000${course.imageUrl}` ||
-                      "/default-course.jpg"
-                    }
-                    alt={course.title}
-                    className="course-image"
-                    onError={(e) => (e.target.src = "/default-course.jpg")}
+              filteredCourses
+                .slice(0, 4)
+                .map((course) => (
+                  <CourseCard
+                    key={course._id}
+                    course={course}
+                    enrolledCourses={enrolledCourses}
+                    handleEnroll={handleEnroll}
                   />
-                  <div className="course-info">
-                    <h3>{course.title}</h3>
-                    <p>{course.description.slice(0, 100)}...</p>
-                    <p className="price">${course.price}</p>
-                    <p className="platform">
-                      By {course.teacher?.name || "Instructor"}
-                    </p>
-                    <div className="rating">
-                      ⭐ {course.rating.toFixed(1)} ({course.reviews.length}{" "}
-                      reviews)
-                    </div>
-                    {enrolledCourses.includes(course._id) ? (
-                      <Link to={`/student/course-content/${course._id}`}>
-                        <button className="enroll-button">View Course</button>
-                      </Link>
-                    ) : (
-                      <button
-                        className="enroll-button"
-                        onClick={() => handleEnroll(course._id)}
-                      >
-                        Enroll
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))
+                ))
             ) : (
               <p>No courses found for your search.</p>
             )}
@@ -187,158 +161,251 @@ export default function Home() {
         <div className="container">
           <h2 className="section-title">Meet Our Popular Tutors</h2>
           <div className="tutors-grid">
-            {tutors.map((tutor, index) => {
-              const imageIndex = (index % 6) + 1;
-              return (
-                <div key={tutor._id} className="tutor-card">
-                  <img
-                    src={`/teacher-${imageIndex}.jpg`}
-                    alt={tutor.name}
-                    className="tutor-image"
-                  />
-                  <h4 className="tutor-name">{tutor.name}</h4>
-                  <p className="tutor-role">{tutor.role}</p>
-                </div>
-              );
-            })}
+            {tutors.map((tutor) => (
+              <div key={tutor._id} className="tutor-card">
+                <img
+                  src={
+                    tutor.picture
+                      ? `http://localhost:3000${tutor.picture}`
+                      : "https://via.placeholder.com/100"
+                  }
+                  alt={tutor.name}
+                  className="tutor-image"
+                />
+                <h4 className="tutor-name">{tutor.name}</h4>
+                <p className="tutor-role">{tutor.role}</p>
+                <p className="course-count">
+                  {tutor.courseCount}{" "}
+                  {tutor.courseCount === 1 ? "course" : "courses"}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       <style>{`
-      
+  a.course-link {
+    text-decoration: none;
+    color: inherit;
+  }
 
-        .search-container {
-          display: flex;
-          align-items: center;
-          max-width: 600px;
-          margin: 0 auto 20px auto;
-          border: 2px solid #f90;
-          border-radius: 8px;
-          overflow: hidden;
-        }
+  .search-container {
+  display: flex;
+  align-items: center;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  border-radius: 50px;
+  background-color: #fff;
+  padding: 8px 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #ddd;
+  transition: box-shadow 0.3s ease;
+}
 
-        .sort-dropdown {
-          padding: 10px;
-          border: none;
-          background-color: #f2f2f2;
-          font-size: 14px;
-        }
+.search-container:focus-within {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}
 
-        .search-input {
-          flex: 1;
-          padding: 10px;
-          border: none;
-          outline: none;
-          font-size: 15px;
-        }
-
-        .search-button {
-          background-color: #febd69;
-          border: none;
-          padding: 10px 16px;
-          cursor: pointer;
-          font-size: 16px;
-        }
-
-        .enroll-button {
-          margin-top: 10px;
-          padding: 10px 15px;
-          background-color: #00796b;
-          color: white;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-        }
-
-        .enroll-button:disabled {
-          background-color: #ccc;
-          cursor: not-allowed;
-        }
-
-        .courses-grid {
-          display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 fixed columns */
-  gap: 20px;
-        }
-
-        .course-card {
-          background: #fff;
-          border-radius: 10px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-          overflow: hidden;
-          transition: transform 0.2s ease;
-          cursor: pointer;
-        }
-
-        .course-card:hover {
-          transform: translateY(-5px);
-        }
-
-        .course-image {
-          width: 100%;
-          height: 180px;
-          object-fit: cover;
-        }
-
-        .course-info {
-          padding: 15px;
-        }
-
-        .tutors-grid {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          gap: 20px;
-        }
-
-        .tutor-card {
-          width: 160px;
-          padding: 15px;
-          text-align: center;
-          background: white;
-          border-radius: 10px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .tutor-image {
-          width: 100px;
-          height: 100px;
-          border-radius: 50%;
-          object-fit: cover;
-          margin-bottom: 10px;
-        }
-
-        .tutor-name {
-          font-size: 16px;
-          font-weight: bold;
-          margin-bottom: 5px;
-          color: #333;
-        }
-
-        .tutor-role {
-          font-size: 14px;
-          color: #777;
-        }
-
-        .view-course-button {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 10px 15px;
-  background-color: #00796b;
-  color: white;
+.search-input {
+  flex: 1;
   border: none;
-  border-radius: 5px;
-  text-align: center;
-  text-decoration: none;
+  outline: none;
+  padding: 12px 16px;
+  font-size: 16px;
+  border-radius: 50px;
+  background-color: transparent;
+  color: #333;
+}
+
+.sort-dropdown {
+  margin-left: 12px;
+  border: none;
+  background-color: #f4f4f4;
+  padding: 10px 12px;
   font-size: 14px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
-.view-course-button:hover {
-  background-color: #1565c0;
+.search-button {
+  background-color: #00796b;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-left: 12px;
+  font-size: 16px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
-      `}</style>
+
+.search-button:hover {
+  background-color: #005f56;
+}
+
+
+  .enroll-button {
+    margin-top: 10px;
+    padding: 10px;
+    text-align: center;
+    background-color: #00796b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .enroll-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+
+  .courses-grid {
+    display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+
+  .course-card {
+    display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+
+  height: 100%; /* ensure it can stretch */
+  }
+
+  .course-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .course-description {
+  min-height: 40px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+  .course-image {
+    width: 100%;
+  height: 180px;
+  object-fit: cover;
+  }
+
+  .course-info {
+    flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 15px;
+  }
+
+  .rating{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  margin: 10px 0;
+  }
+
+  .tutors-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .tutor-card {
+    width: 160px;
+    padding: 15px;
+    text-align: center;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .tutor-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+  }
+
+  .tutor-name {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+  }
+
+  .tutor-role {
+    font-size: 14px;
+    color: #777;
+  }
+
+  .view-course-button {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 15px;
+    background-color: #00796b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .view-course-button:hover {
+    background-color: #1565c0;
+  }
+
+  /* Responsive Grid Breakpoints */
+  @media (max-width: 1200px) {
+    .courses-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 900px) {
+    .courses-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .courses-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .search-container {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .sort-dropdown,
+    .search-input,
+    .search-button {
+      width: 100%;
+      font-size: 16px;
+      padding: 12px;
+    }
+
+    .search-button {
+      margin-top: 10px;
+    }
+  }
+`}</style>
     </>
   );
 }

@@ -17,6 +17,7 @@ const AdminUsers = () => {
   const [usersPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [editStatus, setEditStatus] = useState("active");
 
   useEffect(() => {
     fetchUsers();
@@ -51,23 +52,36 @@ const AdminUsers = () => {
     setEditName(user.name);
     setEditEmail(user.email);
     setEditRole(user.role);
+    setEditStatus(user.status || "active");
   };
 
   const handleUpdate = async () => {
     try {
       await axios.put(
         `http://localhost:3000/api/admin/update/${editingUser}`,
-        { name: editName, email: editEmail, role: editRole },
+        {
+          name: editName,
+          email: editEmail,
+          role: editRole,
+          status: editStatus,
+        },
         { withCredentials: true }
       );
       toast.success("User updated successfully!");
       setUsers(
         users.map((u) =>
           u._id === editingUser
-            ? { ...u, name: editName, email: editEmail, role: editRole }
+            ? {
+                ...u,
+                name: editName,
+                email: editEmail,
+                role: editRole,
+                status: editStatus,
+              }
             : u
         )
       );
+
       setEditingUser(null);
     } catch (error) {
       toast.error(error.response?.data?.message || "Update failed");
@@ -126,6 +140,7 @@ const AdminUsers = () => {
               <th>Name</th>
               <th>Email</th>
               <th>Role</th>
+              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -183,13 +198,35 @@ const AdminUsers = () => {
                           value={editRole}
                           onChange={(e) => setEditRole(e.target.value)}
                         >
-                          <option value="user">User</option>
-                          <option value="admin">Admin</option>
+                          <option value="student">Student</option>
+                          <option value="teacher">Teacher</option>
                         </select>
                       ) : (
                         user.role
                       )}
                     </td>
+                    <td>
+                      {editingUser === user._id ? (
+                        <select
+                          value={editStatus}
+                          onChange={(e) => setEditStatus(e.target.value)}
+                        >
+                          <option value="active">Active</option>
+                          <option value="inactive">Inactive</option>
+                        </select>
+                      ) : (
+                        <span
+                          className={`status-badge ${
+                            user.status === "active"
+                              ? "status-active"
+                              : "status-inactive"
+                          }`}
+                        >
+                          {user.status || "unknown"}
+                        </span>
+                      )}
+                    </td>
+
                     <td>
                       {user._id !== loggedInUserId &&
                         (editingUser === user._id ? (

@@ -20,6 +20,10 @@ const getAdminStats = async (req, res) => {
     const totalUsers = await UserModel.countDocuments();
     const totalStudents = await UserModel.countDocuments({ role: "student" });
     const totalTeachers = await UserModel.countDocuments({ role: "teacher" });
+    const activeUsers = await UserModel.countDocuments({ status: "active" });
+    const inactiveUsers = await UserModel.countDocuments({
+      status: "inactive",
+    });
 
     const totalCourses = await CourseModel.countDocuments();
     const approvedCourses = await CourseModel.countDocuments({
@@ -64,6 +68,8 @@ const getAdminStats = async (req, res) => {
       success: true,
       data: {
         totalUsers,
+        activeUsers,
+        inactiveUsers,
         totalStudents,
         totalTeachers,
         totalCourses,
@@ -81,7 +87,7 @@ const getAdminStats = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const users = await UserModel.find({ status: "active" });
+    const users = await UserModel.find();
     res.status(200).json({ success: true, data: users });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -92,7 +98,6 @@ const deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
 
-    // Validate ObjectId format
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return res
         .status(400)
@@ -114,11 +119,11 @@ const deleteUser = async (req, res) => {
     if (user.role === "teacher") {
       await CourseModel.updateMany(
         { teacher: userId },
-        { $set: { status: "archived", teacher: null } } // Archive courses and remove teacher reference
+        { $set: { status: "archived", teacher: null } }
       );
     }
 
-    user.status = "deleted";
+    user.status = "inactive";
     await user.save();
 
     res
@@ -140,9 +145,21 @@ const updateUser = async (req, res) => {
         .json({ success: false, message: "User not found!" });
     }
 
+    if (role && role === "admin") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Role cannot be changed to 'admin'. Only 'student' or 'teacher' roles are allowed.",
+      });
+    }
+
     user.name = name || user.name;
     user.email = email || user.email;
-    user.role = role || user.role;
+
+    // Only update role if it's not 'admin'
+    if (role && (role === "student" || role === "teacher")) {
+      user.role = role;
+    }
 
     await user.save();
 
@@ -154,7 +171,6 @@ const updateUser = async (req, res) => {
 
 const getCourses = async (req, res) => {
   try {
-    // Only allow admins to access this
     if (req.user.role !== "admin") {
       return res
         .status(403)
@@ -162,12 +178,67 @@ const getCourses = async (req, res) => {
     }
 
     const courses = await CourseModel.find()
-      .populate("teacher", "name email") // Populate teacher info (name and email only)
+      .populate("teacher", "name email")
       .exec();
 
     res.status(200).json({ success: true, courses });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const getCourseById = async (req, res) => {
+  try {
+    const course = await CourseModel.findById(req.params.courseId).populate(
+      "reviews.user",
+      "name"
+    );
+    if (!course) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found" });
+    }
+
+    res.json({ success: true, course });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const deleteCourseReviewByAdmin = async (req, res) => {
+  try {
+    const { courseId, reviewId } = req.params;
+
+    const course = await CourseModel.findById(courseId);
+    if (!course) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found" });
+    }
+
+    const reviewIndex = course.reviews.findIndex(
+      (r) => r._id.toString() === reviewId
+    );
+
+    if (reviewIndex === -1) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Review not found" });
+    }
+
+    course.reviews.splice(reviewIndex, 1);
+
+    // Recalculate course rating
+    const totalRating = course.reviews.reduce((sum, r) => sum + r.rating, 0);
+    course.rating = course.reviews.length
+      ? totalRating / course.reviews.length
+      : 0;
+
+    await course.save();
+
+    res.json({ success: true, message: "Review deleted by admin" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -178,4 +249,6 @@ module.exports = {
   deleteUser,
   updateUser,
   getCourses,
+  deleteCourseReviewByAdmin,
+  getCourseById,
 };

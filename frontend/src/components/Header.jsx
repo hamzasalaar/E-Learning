@@ -38,7 +38,7 @@ const Header = () => {
         <div className="header-container">
           {/* Logo */}
           <Link to="/" className="logo">
-            <span className="logo-text">Course</span>Mania
+            <span className="logo-text">Academix</span>
           </Link>
 
           {/* Hamburger Menu Icon */}
@@ -122,8 +122,8 @@ const Header = () => {
               </>
             )}
             <Link to="/cart" className="cart">
-              <FaShoppingCart size={20} />
-              <span className="cart-badge">1</span>
+              {/* <FaShoppingCart size={20} />
+              <span className="cart-badge">1</span> */}
             </Link>
           </div>
         </div>

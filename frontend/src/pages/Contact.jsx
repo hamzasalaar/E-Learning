@@ -30,13 +30,19 @@ const Contact = () => {
         <div className="contact-left">
           <h2>Contact Us</h2>
           <p>
-            Have questions, suggestions, or need help? Feel free to reach out — our team is here to support
-            you.
+            Have questions, suggestions, or need help? Feel free to reach out —
+            our team is here to support you.
           </p>
           <ul>
-            <li><strong>Email:</strong> support@example.com</li>
-            <li><strong>Phone:</strong> +123 456 7890</li>
-            <li><strong>Location:</strong> Kigali, Rwanda</li>
+            <li>
+              <strong>Email:</strong> support@example.com
+            </li>
+            <li>
+              <strong>Phone:</strong> +123 456 7890
+            </li>
+            <li>
+              <strong>Location:</strong> Kyrenia, KKTC
+            </li>
           </ul>
         </div>
 
@@ -74,7 +80,9 @@ const Contact = () => {
             required
           />
           <button type="submit">Send Message</button>
-          {submitted && <p className="success">Thank you! Your message has been sent.</p>}
+          {submitted && (
+            <p className="success">Thank you! Your message has been sent.</p>
+          )}
         </form>
       </div>
 

@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
+import CourseCard from "../components/CourseCard";
 
 export default function PublicCourses() {
   const [courses, setCourses] = useState([]);
@@ -152,57 +153,12 @@ export default function PublicCourses() {
           {currentCourses.map((course) => {
             const isEnrolled = enrolledCourses.includes(course._id);
             return (
-              <div
-                className="course-card"
+              <CourseCard
                 key={course._id}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                <img
-                  src={
-                    `http://localhost:3000${course.imageUrl}` ||
-                    "/default-course.jpg"
-                  }
-                  alt={course.title}
-                  className="course-image"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = "/default-course.jpg";
-                  }}
-                />
-                <div className="course-content">
-                  <h3>{course.title}</h3>
-                  <p className="description">
-                    {course.description.slice(0, 100)}...
-                  </p>
-                  <div className="details">
-                    <p>
-                      <strong>Price:</strong> ${course.price.toFixed(2)}
-                    </p>
-                    <p>
-                      <strong>Students Enrolled:</strong>{" "}
-                      {course.studentsEnrolled?.length || 0}
-                    </p>
-                    <p>
-                      <strong>Rating:</strong> {course.rating}/5 ⭐
-                    </p>
-                  </div>
-                  {user?.role === "student" && isEnrolled ? (
-                    <Link
-                      to={`/student/course-content/${course._id}`}
-                      className="view-course-button"
-                    >
-                      View Course
-                    </Link>
-                  ) : (
-                    <button
-                      className="enroll-button"
-                      onClick={() => handleEnroll(course._id)}
-                    >
-                      Enroll
-                    </button>
-                  )}
-                </div>
-              </div>
+                course={course}
+                enrolledCourses={enrolledCourses}
+                handleEnroll={handleEnroll}
+              />
             );
           })}
         </div>
@@ -264,38 +220,59 @@ export default function PublicCourses() {
         }
 
         .search-container {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          max-width: 600px;
-          margin: 0 auto 30px auto;
-          border: 2px solid #f90;
-          border-radius: 8px;
-          overflow: hidden;
-        }
+  display: flex;
+  align-items: center;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  border-radius: 50px;
+  background-color: #fff;
+  padding: 8px 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #ddd;
+  transition: box-shadow 0.3s ease;
+}
 
-        .sort-dropdown {
-          padding: 10px;
-          border: none;
-          background-color: #f2f2f2;
-          font-size: 14px;
-        }
+.search-container:focus-within {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}
 
-        .search-input {
-          flex: 1;
-          padding: 10px;
-          border: none;
-          outline: none;
-          font-size: 15px;
-        }
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 12px 16px;
+  font-size: 16px;
+  border-radius: 50px;
+  background-color: transparent;
+  color: #333;
+}
 
-        .search-button {
-          background-color: #febd69;
-          border: none;
-          padding: 10px 16px;
-          cursor: pointer;
-          font-size: 16px;
-        }
+.sort-dropdown {
+  margin-left: 12px;
+  border: none;
+  background-color: #f4f4f4;
+  padding: 10px 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.search-button {
+  background-color: #00796b;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-left: 12px;
+  font-size: 16px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.search-button:hover {
+  background-color: #005f56;
+}
+
 
         .info, .error {
           text-align: center;
@@ -306,6 +283,11 @@ export default function PublicCourses() {
         .error {
           color: red;
         }
+
+        a.course-link {
+    text-decoration: none;
+    color: inherit;
+  }
 
         .course-list {
           display: grid;
@@ -322,6 +304,8 @@ export default function PublicCourses() {
           display: flex;
           flex-direction: column;
           cursor: pointer;
+          text-decoration: none;
+          color: inherit;
         }
 
         .course-card:hover {
@@ -348,31 +332,31 @@ export default function PublicCourses() {
           font-size: 14px;
           color: #444;
           margin-bottom: 10px;
+          text-decoration: none;
+          color: inherit;
         }
 
         .details p {
           margin: 5px 0;
           font-size: 14px;
+          text-decoration: none;
+          color: inherit;
         }
 
-        .enroll-button,
-        .view-course-button {
-          margin-top: 10px;
-          padding: 8px 12px;
-          border: none;
-          border-radius: 5px;
-          font-size: 14px;
-          cursor: pointer;
-          display: inline-block;
-          text-align: center;
-          text-decoration: none;
-          background-color: #00796b;
-          color: white;
-        }
-          .enroll-button:hover,
-          .view-course-button:hover {
-          background-color:rgb(103, 173, 164);
-          }
+        .enroll-button {
+    margin-top: 10px;
+    padding: 10px 15px;
+    background-color: #00796b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .enroll-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
 
         @media (max-width: 768px) {
           .search-container {

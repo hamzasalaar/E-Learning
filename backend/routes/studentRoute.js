@@ -19,6 +19,7 @@ const {
   getLiveSessionsByCourse,
   getRecordings,
 } = require("../controllers/liveSessionController");
+const uploadProfilePic = require("../utils/uploadProfilePic");
 
 const StudentRoute = express.Router();
 
@@ -26,15 +27,19 @@ const StudentRoute = express.Router();
 StudentRoute.use(isAuthenticated, isStudent);
 
 StudentRoute.get("/profile", getStudentProfile);
-StudentRoute.put("/profile", updateUserProfile);
+StudentRoute.put(
+  "/profile",
+  uploadProfilePic.single("profilePic"),
+  updateUserProfile
+);
 
 StudentRoute.post("/enroll/:courseId", enrollInCourse);
 StudentRoute.get("/my-courses", getEnrolledCourses);
 StudentRoute.post("/unenroll/:courseId", unenrollFromCourse);
 
 StudentRoute.post("/review/:courseId", createReview);
-StudentRoute.put("/:courseId/update-review", updateReview);
-StudentRoute.delete("/:courseId/review", deleteReview);
+StudentRoute.put("/review/:courseId", updateReview);
+StudentRoute.delete("/review/:courseId", deleteReview);
 
 StudentRoute.put("/progress/:courseId", updateProgress); // Update progress in a course
 StudentRoute.get("/courses/:courseId", getCourseDetails);

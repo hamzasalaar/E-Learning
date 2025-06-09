@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "../css/Admin.css"; // Make sure this is the path to your new CSS file
+import "../css/Admin.css";
 
 export default function Admin() {
   const [stats, setStats] = useState(null);
@@ -22,23 +22,13 @@ export default function Admin() {
 
   if (!stats) return <p>Loading...</p>;
 
-  const userRoleData = [
-    { name: "Students", value: stats.totalStudents },
-    { name: "Teachers", value: stats.totalTeachers },
-    { name: "Admins", value: stats.totalAdmins },
-  ];
-
-  const courseStatusData = [
-    { name: "Approved", value: stats.totalApprovedCourses },
-    { name: "Pending", value: stats.totalPendingCourses },
-    { name: "Rejected", value: stats.totalRejectedCourses },
-  ];
-
   return (
     <div className="dashboard">
       <h2>Dashboard Stats</h2>
       <div className="stats-grid">
         <div>Total Users: {stats.totalUsers}</div>
+        <div>Active Users: {stats.activeUsers}</div>
+        <div>Inactive Users: {stats.inactiveUsers}</div>
         <div>Students: {stats.totalStudents}</div>
         <div>Teachers: {stats.totalTeachers}</div>
         <div>Total Courses: {stats.totalCourses}</div>

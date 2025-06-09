@@ -33,6 +33,7 @@ const {
 } = require("../controllers/notificationController");
 const { updateUserProfile } = require("../controllers/studentController");
 const uploadImage = require("../utils/uploadImage");
+const uploadProfilePic = require("../utils/uploadProfilePic");
 const {
   createLiveSession,
   getLiveSessionsByCourse,
@@ -46,12 +47,12 @@ const {
 
 const TeacherRoute = express.Router();
 
-// 🔐 Middleware: apply to all
+//Middleware: apply to all
 TeacherRoute.use(isAuthenticated, isTeacher);
 
-// ✅ Course routes
+// Course routes
 TeacherRoute.get("/profile", getTeacherProfile);
-TeacherRoute.put("/update-profile", updateUserProfile);
+TeacherRoute.put("/update-profile", uploadProfilePic.single("profilePic"), updateUserProfile);
 TeacherRoute.get("/courses", getTeacherCourses);
 TeacherRoute.post("/create-course", uploadImage.single("image"), createCourse);
 TeacherRoute.put(
@@ -61,11 +62,11 @@ TeacherRoute.put(
 );
 TeacherRoute.delete("/delete/:courseId", deleteCourse);
 
-// ✅ Student + resubmit
+// Student + resubmit
 TeacherRoute.get("/courses/:courseId/enrollments", getEnrolledStudents);
 TeacherRoute.post("/courses/:courseId/resubmit", resubmitCourse);
 
-// ✅ NEW: Single course + materials
+// NEW: Single course + materials
 TeacherRoute.get("/courses/:courseId", getSingleCourse);
 TeacherRoute.get("/courses/:courseId/materials", getMaterialsForCourse);
 TeacherRoute.post(
@@ -92,7 +93,7 @@ TeacherRoute.delete("/session/:sessionId", cancelSession);
 TeacherRoute.delete("/session/:sessionId", deleteSession);
 TeacherRoute.get("/recordings/:meetingID", getRecordings);
 
-// ✅ Routes for Notifications
+// Routes for Notifications
 // must be after isAuthenticated middleware
 // TeacherRoute.get("/notifications", isTeacher, getNotifications);
 // TeacherRoute.put("/notifications/:id/read", isTeacher, markAsRead);

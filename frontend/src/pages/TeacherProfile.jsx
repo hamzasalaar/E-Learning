@@ -1,230 +1,208 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { toast } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 export default function TeacherProfile() {
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [teacher, setTeacher] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    imageUrl: "",
-  });
+  const [name, setName] = useState("");
+  const [profilePic, setProfilePic] = useState(null);
   const [preview, setPreview] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/teacher/profile", {
-          withCredentials: true,
-        });
-
-        const teacher = res.data.teacher;
-        setProfile(teacher);
-        setFormData({
-          name: teacher.name,
-          email: teacher.email,
-          imageUrl: teacher.imageUrl || "",
-        });
-        setPreview(teacher.imageUrl || "");
-        setLoading(false);
+        const { data } = await axios.get(
+          "http://localhost:3000/api/teacher/profile",
+          {
+            withCredentials: true,
+          }
+        );
+        setTeacher(data.teacher);
+        setName(data.teacher.name);
+        setPreview(`http://localhost:3000${data.teacher.picture}`);
       } catch (err) {
-        console.error(err);
-        setError("Failed to load profile");
-        setLoading(false);
+        toast.error("Failed to load profile");
       }
     };
 
     fetchProfile();
   }, []);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleUpdate = async (e) => {
+    e.preventDefault();
 
-    if (name === "imageUrl") {
-      setPreview(value);
+    if (password && password !== confirmPassword) {
+      return toast.error("Passwords do not match!");
     }
-  };
 
-  const handleProfileUpdate = async () => {
+    const formData = new FormData();
+    formData.append("name", name);
+    if (profilePic) formData.append("profilePic", profilePic);
+    if (password) formData.append("password", password);
+
     try {
       const res = await axios.put(
-        "http://localhost:3000/api/teacher/profile",
+        "http://localhost:3000/api/teacher/update-profile",
+        formData,
         {
-          name: formData.name,
-          profilePicture: formData.imageUrl, // matched to backend field
-        },
-        { withCredentials: true }
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        }
       );
 
-      setProfile(res.data.teacher);
-      toast.success("Profile updated successfully");
+      toast.success("Profile updated successfully!");
       setIsEditing(false);
+      setTeacher(res.data.user);
+      setPreview(`http://localhost:3000${res.data.user.picture}`);
+      setPassword("");
+      setConfirmPassword("");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update profile");
+      toast.error("Update failed");
     }
   };
 
-  if (loading) return <div style={styles.loading}>Loading...</div>;
-  if (error) return <div style={styles.error}>{error}</div>;
+  if (!teacher) return <p>Loading...</p>;
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.heading}>Teacher Profile</h1>
-      <div style={styles.card}>
-        {isEditing ? (
-          <>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Name:</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                style={styles.input}
-              />
-            </div>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Email:</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                readOnly
-                style={styles.input}
-              />
-            </div>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Profile Picture URL (Optional):</label>
-              <input
-                type="text"
-                name="imageUrl"
-                value={formData.imageUrl}
-                onChange={handleInputChange}
-                style={styles.input}
-              />
-              {preview && (
-                <img src={preview} alt="Preview" style={styles.preview} />
-              )}
-            </div>
-            <div style={styles.buttonGroup}>
-              <button onClick={handleProfileUpdate} style={styles.saveButton}>
-                Save
-              </button>
-              <button onClick={() => setIsEditing(false)} style={styles.cancelButton}>
-                Cancel
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <p style={styles.info}><strong>Name:</strong> {profile?.name}</p>
-            <p style={styles.info}><strong>Email:</strong> {profile?.email}</p>
-            <p style={styles.info}><strong>Role:</strong> {profile?.role}</p>
-            {profile?.imageUrl && (
-              <img src={profile.imageUrl} alt="Profile" style={styles.preview} />
-            )}
-            <button onClick={() => setIsEditing(true)} style={styles.updateButton}>
-              Edit Profile
+    <div className="teacher-profile">
+      <h2>My Profile</h2>
+      <img src={preview} alt="Profile" className="profile-image" />
+
+      {isEditing ? (
+        <form onSubmit={handleUpdate} className="profile-form">
+          <label>
+            Change Profile Picture:
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                setProfilePic(e.target.files[0]);
+                setPreview(URL.createObjectURL(e.target.files[0]));
+              }}
+            />
+          </label>
+
+          <label>
+            Name:
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </label>
+
+          <label>
+            New Password:
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
+
+          <label>
+            Confirm Password:
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+          </label>
+
+          <div className="btn-group">
+            <button type="submit">Save Changes</button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsEditing(false);
+                setPassword("");
+                setConfirmPassword("");
+              }}
+            >
+              Cancel
             </button>
-          </>
-        )}
-      </div>
+          </div>
+        </form>
+      ) : (
+        <div className="profile-view">
+          <p>
+            <strong>Name:</strong> {teacher.name}
+          </p>
+          <p>
+            <strong>Email:</strong> {teacher.email}
+          </p>
+          <button onClick={() => setIsEditing(true)}>Edit Profile</button>
+        </div>
+      )}
+
+      <style>{`
+        .teacher-profile {
+          max-width: 500px;
+          margin: auto;
+          padding: 20px;
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .profile-image {
+          width: 120px;
+          height: 120px;
+          object-fit: cover;
+          border-radius: 50%;
+          margin-bottom: 20px;
+        }
+
+        .profile-form label {
+          display: block;
+          margin: 15px 0 5px;
+        }
+
+        .profile-form input {
+          width: 100%;
+          padding: 10px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+        }
+
+        .btn-group {
+          margin-top: 20px;
+          display: flex;
+          gap: 10px;
+        }
+
+        .btn-group button {
+          padding: 10px 15px;
+          background: #00796b;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+
+        .btn-group button:last-child {
+          background: #aaa;
+        }
+
+        .profile-view p {
+          margin: 10px 0;
+        }
+
+        .profile-view button {
+          margin-top: 20px;
+          padding: 10px 15px;
+          background-color: #00796b;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+      `}</style>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    maxWidth: "600px",
-    margin: "50px auto",
-    padding: "20px",
-    fontFamily: "Arial, sans-serif",
-    backgroundColor: "#f9f9f9",
-    borderRadius: "8px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-  },
-  heading: {
-    textAlign: "center",
-    color: "#333",
-    marginBottom: "20px",
-  },
-  card: {
-    padding: "20px",
-    backgroundColor: "#fff",
-    borderRadius: "8px",
-    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-    marginBottom: "20px",
-  },
-  inputGroup: {
-    marginBottom: "15px",
-  },
-  label: {
-    display: "block",
-    marginBottom: "5px",
-    fontWeight: "bold",
-    color: "#555",
-  },
-  input: {
-    width: "100%",
-    padding: "10px",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-    fontSize: "14px",
-  },
-  preview: {
-    width: "60px",
-    height: "60px",
-    borderRadius: "50%",
-    marginTop: "10px",
-    objectFit: "cover",
-  },
-  info: {
-    fontSize: "16px",
-    margin: "10px 0",
-    color: "#555",
-  },
-  buttonGroup: {
-    display: "flex",
-    justifyContent: "space-between",
-  },
-  saveButton: {
-    padding: "10px 20px",
-    backgroundColor: "#28a745",
-    color: "#fff",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-  },
-  cancelButton: {
-    padding: "10px 20px",
-    backgroundColor: "#dc3545",
-    color: "#fff",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-  },
-  updateButton: {
-    padding: "10px 20px",
-    backgroundColor: "#007bff",
-    color: "#fff",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-    marginTop: "20px",
-  },
-  loading: {
-    textAlign: "center",
-    fontSize: "18px",
-    color: "#555",
-  },
-  error: {
-    textAlign: "center",
-    fontSize: "18px",
-    color: "#dc3545",
-  },
-};

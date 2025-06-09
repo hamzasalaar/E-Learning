@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "../css/Admin.css"; // Adjust path if needed
+import "../css/Admin.css";
+import { toast } from "react-hot-toast";
 
 const AdminCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -102,6 +103,24 @@ const AdminCourses = () => {
       setShowStatsModal(true); // Show stats modal
     } catch (err) {
       console.error("Error fetching course stats:", err.message);
+    }
+  };
+  const handleDeleteReview = async (reviewId) => {
+    console.log("Delete review from course:", courseStats._id);
+    try {
+      await axios.delete(
+        `http://localhost:3000/api/admin/review/${courseStats.courseId}/${reviewId}`,
+        { withCredentials: true }
+      );
+      toast.success("Review deleted!");
+      // Refresh the course data after deletion
+      const res = await axios.get(
+        `http://localhost:3000/api/admin/course/${courseStats.courseId}`,
+        { withCredentials: true }
+      );
+      setCourseStats(res.data.course);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete review.");
     }
   };
 
@@ -390,6 +409,12 @@ const AdminCourses = () => {
                       stars)
                     </p>
                     <p>{review.comment}</p>
+                    <button
+                      onClick={() => handleDeleteReview(review._id)}
+                      className="delete-review-btn"
+                    >
+                      Delete
+                    </button>
                   </div>
                 ))
               ) : (

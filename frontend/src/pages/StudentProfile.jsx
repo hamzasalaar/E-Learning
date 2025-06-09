@@ -6,7 +6,9 @@ export default function StudentProfile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isEditing, setIsEditing] = useState(false); // State to toggle edit mode
+  const [isEditing, setIsEditing] = useState(false);
+  const [profilePic, setProfilePic] = useState(null);
+  const [preview, setPreview] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -30,6 +32,8 @@ export default function StudentProfile() {
           password: "",
           confirmPassword: "",
         });
+        setPreview(`http://localhost:3000${res.data.student.picture}`);
+
         setLoading(false);
       } catch (err) {
         setError("Failed to load profile");
@@ -51,15 +55,26 @@ export default function StudentProfile() {
       return;
     }
 
+    const data = new FormData();
+    data.append("name", formData.name);
+    data.append("email", formData.email);
+    if (formData.password) data.append("password", formData.password);
+    if (profilePic) data.append("profilePic", profilePic);
+
     try {
       const res = await axios.put(
         "http://localhost:3000/api/student/profile",
-        formData,
-        { withCredentials: true }
+        data,
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        }
       );
-      setProfile(res.data.student); // Update profile with the new data
-      setIsEditing(false); // Exit edit mode
+
+      setProfile(res.data.user);
+      setIsEditing(false);
       toast.success("Profile updated successfully!");
+      setPreview(`http://localhost:3000${res.data.user.picture}`);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update profile");
     }
@@ -77,9 +92,25 @@ export default function StudentProfile() {
     <div style={styles.container}>
       <h1 style={styles.heading}>Student Profile</h1>
       <div style={styles.card}>
+        <img
+          src={preview || "https://via.placeholder.com/120"}
+          alt="Profile"
+          style={styles.profileImage}
+        />
+
         {isEditing ? (
           <>
             <div style={styles.inputGroup}>
+              <label style={styles.label}>Profile Picture:</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  setProfilePic(e.target.files[0]);
+                  setPreview(URL.createObjectURL(e.target.files[0]));
+                }}
+                style={styles.input}
+              />
               <label style={styles.label}>Name:</label>
               <input
                 type="text"
@@ -167,6 +198,7 @@ const styles = {
     borderRadius: "8px",
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
   },
+
   heading: {
     textAlign: "center",
     color: "#333",
@@ -237,5 +269,12 @@ const styles = {
     textAlign: "center",
     fontSize: "18px",
     color: "#dc3545",
+  },
+  profileImage: {
+    width: "120px",
+    height: "120px",
+    borderRadius: "50%",
+    objectFit: "cover",
+    marginBottom: "20px",
   },
 };
