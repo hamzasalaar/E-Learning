@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 const TeacherCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -13,7 +14,7 @@ const TeacherCourses = () => {
     const fetchCourses = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3000/api/teacher/courses",
+          `${API_BASE_URL}/api/teacher/courses`,
           {
             withCredentials: true,
             headers: {
@@ -59,7 +60,7 @@ const TeacherCourses = () => {
               style={{ textDecoration: "none", color: "inherit" }}
             >
               <img
-                src={`http://localhost:3000${course.imageUrl}`}
+                src={`${API_BASE_URL}${course.imageUrl}`}
                 alt={course.title}
                 className="course-image"
               />

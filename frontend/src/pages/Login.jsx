@@ -6,6 +6,7 @@ import { useState } from "react";
 import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { SetUser } from "../redux/AuthSlice";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 export default function Login() {
   const dispatch = useDispatch();
@@ -21,7 +22,7 @@ export default function Login() {
 
     try {
       const request = await axios.post(
-        "http://localhost:3000/api/auth/login",
+        `${API_BASE_URL}/api/auth/login`,
         { email, password },
         { withCredentials: true }
       );

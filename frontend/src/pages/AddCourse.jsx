@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // ✅ Add navigation hook
+import { useNavigate } from "react-router-dom";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 const AddCourse = () => {
-  const navigate = useNavigate(); // ✅ Initialize navigate
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -40,7 +41,7 @@ const AddCourse = () => {
       data.append("image", formData.image); // <-- append file
 
       const res = await axios.post(
-        "http://localhost:3000/api/teacher/create-course",
+        `${API_BASE_URL}/api/teacher/create-course`,
         data,
         {
           withCredentials: true,

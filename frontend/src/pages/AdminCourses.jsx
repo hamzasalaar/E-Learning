@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../css/Admin.css";
 import { toast } from "react-hot-toast";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 const AdminCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -21,7 +22,7 @@ const AdminCourses = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/admin/courses", {
+        const res = await axios.get(`${API_BASE_URL}/api/admin/courses`, {
           withCredentials: true,
         });
         setCourses(res.data.courses);
@@ -48,8 +49,8 @@ const AdminCourses = () => {
     try {
       const endpoint =
         status === "approved"
-          ? `http://localhost:3000/api/admin/course/approve/${courseId}`
-          : `http://localhost:3000/api/admin/course/reject/${courseId}`;
+          ? `${API_BASE_URL}/api/admin/course/approve/${courseId}`
+          : `${API_BASE_URL}/api/admin/course/reject/${courseId}`;
 
       const body = status === "rejected" ? { rejectionReason } : undefined;
 
@@ -81,7 +82,7 @@ const AdminCourses = () => {
   const handleDelete = async (courseId) => {
     try {
       await axios.delete(
-        `http://localhost:3000/api/admin/course/delete/${courseId}`,
+        `${API_BASE_URL}/api/admin/course/delete/${courseId}`,
         { withCredentials: true }
       );
       setCourses((prev) => prev.filter((c) => c._id !== courseId));
@@ -96,7 +97,7 @@ const AdminCourses = () => {
   const handleViewStats = async (courseId) => {
     try {
       const res = await axios.get(
-        `http://localhost:3000/api/admin/course/stats/${courseId}`,
+        `${API_BASE_URL}/api/admin/course/stats/${courseId}`,
         { withCredentials: true }
       );
       setCourseStats(res.data); // Set the course stats data to display
@@ -109,13 +110,13 @@ const AdminCourses = () => {
     console.log("Delete review from course:", courseStats._id);
     try {
       await axios.delete(
-        `http://localhost:3000/api/admin/review/${courseStats.courseId}/${reviewId}`,
+        `${API_BASE_URL}/api/admin/review/${courseStats.courseId}/${reviewId}`,
         { withCredentials: true }
       );
       toast.success("Review deleted!");
       // Refresh the course data after deletion
       const res = await axios.get(
-        `http://localhost:3000/api/admin/course/${courseStats.courseId}`,
+        `${API_BASE_URL}/api/admin/course/${courseStats.courseId}`,
         { withCredentials: true }
       );
       setCourseStats(res.data.course);

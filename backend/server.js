@@ -23,6 +23,7 @@ const allowedOrigins = [
   "http://192.168.3.147:8081", // Expo Dev Tools
   "http://192.168.3.147:19006", // Expo Go app
   "http://localhost:8081",
+  "https://frontend-bz16.onrender.com/", // Production frontend URL
 ];
 
 // CORS middleware with debug logging

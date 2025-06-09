@@ -15,6 +15,7 @@ export default function PublicCourses() {
   const [currentPage, setCurrentPage] = useState(1);
   const coursesPerPage = 6;
   const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   const user = useSelector((state) => state.Auth.user);
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ export default function PublicCourses() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/public/courses");
+        const res = await axios.get(`${API_BASE_URL}/api/public/courses`);
         const approvedCourses = res.data.courses.filter(
           (c) => c.status === "approved"
         );
@@ -46,7 +47,7 @@ export default function PublicCourses() {
       if (user?.role === "student") {
         try {
           const res = await axios.get(
-            "http://localhost:3000/api/student/my-courses",
+            `${API_BASE_URL}/api/student/my-courses`,
             {
               withCredentials: true,
             }
@@ -96,7 +97,7 @@ export default function PublicCourses() {
 
     try {
       const res = await axios.post(
-        `http://localhost:3000/api/student/enroll/${courseId}`,
+        `${API_BASE_URL}/api/student/enroll/${courseId}`,
         {},
         { withCredentials: true }
       );

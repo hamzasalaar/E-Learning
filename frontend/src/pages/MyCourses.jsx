@@ -14,7 +14,7 @@ export default function MyCourses() {
     const fetchCourses = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3000/api/student/my-courses",
+          `${API_BASE_URL}/api/student/my-courses`,
           { withCredentials: true }
         );
         setCourses(res.data.coursesWithProgress || []);
@@ -76,7 +76,7 @@ export default function MyCourses() {
             filteredCourses.map((course) => (
               <div key={course._id} className="course-card">
                 <img
-                  src={`http://localhost:3000${course.imageUrl}` || "/default-course.jpg"}
+                  src={`${API_BASE_URL}${course.imageUrl}` || "/default-course.jpg"}
                   alt={course.title}
                   className="course-img"
                 />

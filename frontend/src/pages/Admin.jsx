@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../css/Admin.css";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 export default function Admin() {
   const [stats, setStats] = useState(null);
@@ -8,7 +9,7 @@ export default function Admin() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/admin/stats", {
+        const res = await axios.get(`${API_BASE_URL}/api/admin/stats`, {
           withCredentials: true,
         });
         setStats(res.data.data);

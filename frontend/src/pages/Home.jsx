@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import CourseCard from "../components/CourseCard";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 export default function Home() {
   const [courses, setCourses] = useState([]);
@@ -21,7 +22,7 @@ export default function Home() {
     const fetchHomeData = async () => {
       try {
         const { data } = await axios.get(
-          "http://localhost:3000/api/public/home"
+          `${API_BASE_URL}/api/public/home`
         );
         setCourses(data.courses);
         setTutors(data.tutors);
@@ -38,7 +39,7 @@ export default function Home() {
       if (user?.role === "student") {
         try {
           const res = await axios.get(
-            "http://localhost:3000/api/student/my-courses",
+            `${API_BASE_URL}/api/student/my-courses`,
             {
               withCredentials: true,
             }
@@ -71,7 +72,7 @@ export default function Home() {
 
     try {
       const res = await axios.post(
-        `http://localhost:3000/api/student/enroll/${courseId}`,
+        `${API_BASE_URL}/api/student/enroll/${courseId}`,
         {},
         { withCredentials: true }
       );
@@ -166,7 +167,7 @@ export default function Home() {
                 <img
                   src={
                     tutor.picture
-                      ? `http://localhost:3000${tutor.picture}`
+                      ? `${API_BASE_URL}${tutor.picture}`
                       : "https://via.placeholder.com/100"
                   }
                   alt={tutor.name}

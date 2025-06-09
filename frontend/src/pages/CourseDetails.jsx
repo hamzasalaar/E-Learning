@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import "../css/CourseDetails.css";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 const CourseDetails = () => {
   const { courseId } = useParams();
@@ -12,7 +13,7 @@ const CourseDetails = () => {
     const fetchCourse = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/api/public/courses/${courseId}`
+          `${API_BASE_URL}/api/public/courses/${courseId}`
         );
         setCourse(res.data.course);
       } catch (err) {

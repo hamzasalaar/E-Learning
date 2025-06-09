@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import MaterialForm from "../components/MaterialForm";
 import { MaterialCard, CourseContentStyles } from "../components/MaterialCard";
 import "../css/CourseContent.css"; // Assuming you have a CSS file for styles
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 const CourseContent = () => {
   const { courseId } = useParams();
@@ -55,11 +56,11 @@ const CourseContent = () => {
     const fetchCourseAndMaterials = async () => {
       try {
         const [courseRes, materialsRes] = await Promise.all([
-          axios.get(`http://localhost:3000/api/teacher/courses/${courseId}`, {
+          axios.get(`${API_BASE_URL}/api/teacher/courses/${courseId}`, {
             withCredentials: true,
           }),
           axios.get(
-            `http://localhost:3000/api/teacher/courses/${courseId}/materials`,
+            `${API_BASE_URL}/api/teacher/courses/${courseId}/materials`,
             {
               withCredentials: true,
             }
@@ -103,7 +104,7 @@ const CourseContent = () => {
       let res;
       if (editMode) {
         res = await axios.put(
-          `http://localhost:3000/api/teacher/courses/${courseId}/materials/${materialId}`,
+          `${API_BASE_URL}/api/teacher/courses/${courseId}/materials/${materialId}`,
           formData,
           {
             headers: {
@@ -122,7 +123,7 @@ const CourseContent = () => {
         );
       } else {
         res = await axios.post(
-          `http://localhost:3000/api/teacher/courses/add-material/${courseId}`,
+          `${API_BASE_URL}/api/teacher/courses/add-material/${courseId}`,
           formData,
           {
             headers: {
@@ -173,7 +174,7 @@ const CourseContent = () => {
     if (!window.confirm("Delete this material?")) return;
     try {
       await axios.delete(
-        `http://localhost:3000/api/teacher/courses/${courseId}/materials/${materialId}`,
+        `${API_BASE_URL}/api/teacher/courses/${courseId}/materials/${materialId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -218,7 +219,7 @@ const CourseContent = () => {
 
     try {
       const res = await axios.put(
-        `http://localhost:3000/api/teacher/update-course/${courseId}`,
+        `${API_BASE_URL}/api/teacher/update-course/${courseId}`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -238,7 +239,7 @@ const CourseContent = () => {
     const fetchLiveSessions = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/api/teacher/course/${courseId}/sessions`,
+          `${API_BASE_URL}/api/teacher/course/${courseId}/sessions`,
           {
             withCredentials: true,
           }
@@ -257,7 +258,7 @@ const CourseContent = () => {
       return;
     try {
       await axios.delete(
-        `http://localhost:3000/api/teacher/session/${sessionId}`,
+        `${API_BASE_URL}/api/teacher/session/${sessionId}`,
         {
           withCredentials: true,
         }
@@ -280,7 +281,7 @@ const CourseContent = () => {
 
     try {
       const res = await axios.get(
-        `http://localhost:3000/api/teacher/recordings/${meetingID}`,
+        `${API_BASE_URL}/api/teacher/recordings/${meetingID}`,
         {
           withCredentials: true,
         }
@@ -306,7 +307,7 @@ const CourseContent = () => {
         </button>
         <div className="header-content">
           <img
-            src={`http://localhost:3000${course.imageUrl}`}
+            src={`${API_BASE_URL}${course.imageUrl}`}
             alt={course.title}
             className="course-image"
           />
@@ -481,7 +482,7 @@ const CourseContent = () => {
                 e.preventDefault();
                 try {
                   const res = await axios.post(
-                    `http://localhost:3000/api/teacher/session/${courseId}`,
+                    `${API_BASE_URL}/api/teacher/session/${courseId}`,
                     newSession,
                     {
                       withCredentials: true,
@@ -553,7 +554,7 @@ const CourseContent = () => {
                       onClick={async () => {
                         try {
                           const res = await axios.get(
-                            `http://localhost:3000/api/teacher/session/${session._id}/moderator-join`,
+                            `${API_BASE_URL}/api/teacher/session/${session._id}/moderator-join`,
                             { withCredentials: true }
                           );
                           window.open(res.data.url, "_blank");

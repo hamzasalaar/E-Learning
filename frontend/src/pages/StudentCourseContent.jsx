@@ -7,6 +7,7 @@ import { FaDownload, FaLink, FaCheckCircle } from "react-icons/fa";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import "../css/StudentCourseContent.css";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 export default function StudentCourseContent() {
   const { courseId } = useParams();
@@ -39,7 +40,7 @@ export default function StudentCourseContent() {
           onClick: async () => {
             try {
               const res = await axios.post(
-                `http://localhost:3000/api/student/unenroll/${courseId}`,
+                `${API_BASE_URL}/api/student/unenroll/${courseId}`,
                 {},
                 { withCredentials: true }
               );
@@ -66,17 +67,17 @@ export default function StudentCourseContent() {
     const fetchCourseData = async () => {
       try {
         const [courseRes, materialsRes, sessionsRes] = await Promise.all([
-          axios.get(`http://localhost:3000/api/student/courses/${courseId}`, {
+          axios.get(`${API_BASE_URL}/api/student/courses/${courseId}`, {
             withCredentials: true,
           }),
           axios.get(
-            `http://localhost:3000/api/student/courses/${courseId}/materials`,
+            `${API_BASE_URL}/api/student/courses/${courseId}/materials`,
             {
               withCredentials: true,
             }
           ),
           axios.get(
-            `http://localhost:3000/api/student/course/${courseId}/live-sessions`,
+            `${API_BASE_URL}/api/student/course/${courseId}/live-sessions`,
             {
               withCredentials: true,
             }
@@ -104,7 +105,7 @@ export default function StudentCourseContent() {
   const handleJoinSession = async (sessionId) => {
     try {
       const res = await axios.get(
-        `http://localhost:3000/api/student/session/${sessionId}/join`,
+        `${API_BASE_URL}/api/student/session/${sessionId}/join`,
         { withCredentials: true }
       );
       if (res.data.url) {
@@ -125,7 +126,7 @@ export default function StudentCourseContent() {
 
     try {
       const res = await axios.get(
-        `http://localhost:3000/api/student/recordings/${meetingID}`,
+        `${API_BASE_URL}/api/student/recordings/${meetingID}`,
         {
           withCredentials: true,
         }
@@ -140,7 +141,7 @@ export default function StudentCourseContent() {
   const handleDelete = async (reviewId) => {
     try {
       await axios.delete(
-        `http://localhost:3000/api/student/review/${courseId}`,
+        `${API_BASE_URL}/api/student/review/${courseId}`,
         {
           withCredentials: true,
         }
@@ -183,7 +184,7 @@ export default function StudentCourseContent() {
   const handleUpdate = async (reviewId) => {
     try {
       await axios.put(
-        `http://localhost:3000/api/student/review/${courseId}`,
+        `${API_BASE_URL}/api/student/review/${courseId}`,
         {
           rating: editedRating,
           comment: editedComment,
@@ -215,7 +216,7 @@ export default function StudentCourseContent() {
         <div className="header-top">
           <div className="header-image">
             <img
-              src={`http://localhost:3000${course.imageUrl}`}
+              src={`${API_BASE_URL}${course.imageUrl}`}
               alt={course.title}
               className="course-img"
             />
@@ -282,7 +283,7 @@ export default function StudentCourseContent() {
                         mat.filePaths?.map((fp, idx) => (
                           <a
                             key={idx}
-                            href={`http://localhost:3000/${fp.replace(
+                            href={`${API_BASE_URL}/${fp.replace(
                               /\\/g,
                               "/"
                             )}`}
@@ -390,7 +391,7 @@ export default function StudentCourseContent() {
               e.preventDefault();
               try {
                 const res = await axios.post(
-                  `http://localhost:3000/api/student/review/${courseId}`,
+                  `${API_BASE_URL}/api/student/review/${courseId}`,
                   { rating: reviewRating, comment: reviewText },
                   { withCredentials: true }
                 );
@@ -398,7 +399,7 @@ export default function StudentCourseContent() {
                 setHasReviewed(true);
 
                 const refreshed = await axios.get(
-                  `http://localhost:3000/api/student/courses/${courseId}`,
+                  `${API_BASE_URL}/api/student/courses/${courseId}`,
                   { withCredentials: true }
                 );
                 setCourse(refreshed.data.course);

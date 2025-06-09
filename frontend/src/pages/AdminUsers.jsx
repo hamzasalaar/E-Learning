@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import "../css/Admin.css";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -26,7 +27,7 @@ const AdminUsers = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/admin/getuser", {
+      const res = await axios.get(`${API_BASE_URL}/api/admin/getuser`, {
         withCredentials: true,
       });
       setUsers(res.data.data);
@@ -37,7 +38,7 @@ const AdminUsers = () => {
 
   const fetchLoggedInUserRole = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/admin/me", {
+      const res = await axios.get(`${API_BASE_URL}/api/admin/me`, {
         withCredentials: true,
       });
       setLoggedInUserRole(res.data.role);
@@ -58,7 +59,7 @@ const AdminUsers = () => {
   const handleUpdate = async () => {
     try {
       await axios.put(
-        `http://localhost:3000/api/admin/update/${editingUser}`,
+        `${API_BASE_URL}/api/admin/update/${editingUser}`,
         {
           name: editName,
           email: editEmail,
@@ -96,7 +97,7 @@ const AdminUsers = () => {
   const handleDelete = async (id) => {
     try {
       await axios.post(
-        `http://localhost:3000/api/admin/deleteuser/${id}`,
+        `${API_BASE_URL}/api/admin/deleteuser/${id}`,
         {},
         { withCredentials: true }
       );

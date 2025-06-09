@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import "../css/Register.css";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -23,7 +24,7 @@ export default function Register() {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/auth/register",
+        `${API_BASE_URL}/api/auth/register`,
         { name, email, password, confirmPassword, role }
       );
 

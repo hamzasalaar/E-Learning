@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 const Tutors = () => {
   const [tutors, setTutors] = useState([]);
@@ -9,7 +10,7 @@ const Tutors = () => {
     const fetchTutors = async () => {
       try {
         // Replace with your real endpoint
-        const res = await axios.get("http://localhost:3000/api/public/tutors");
+        const res = await axios.get(`${API_BASE_URL}/api/public/tutors`);
         setTutors(res.data.tutors || []);
       } catch (err) {
         console.error("Failed to fetch tutors:", err);

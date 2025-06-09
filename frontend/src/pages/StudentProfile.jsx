@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 export default function StudentProfile() {
   const [profile, setProfile] = useState(null);
@@ -20,7 +21,7 @@ export default function StudentProfile() {
     const fetchProfile = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3000/api/student/profile",
+          `${API_BASE_URL}/api/student/profile`,
           {
             withCredentials: true,
           }
@@ -32,7 +33,7 @@ export default function StudentProfile() {
           password: "",
           confirmPassword: "",
         });
-        setPreview(`http://localhost:3000${res.data.student.picture}`);
+        setPreview(`${API_BASE_URL}${res.data.student.picture}`);
 
         setLoading(false);
       } catch (err) {
@@ -63,7 +64,7 @@ export default function StudentProfile() {
 
     try {
       const res = await axios.put(
-        "http://localhost:3000/api/student/profile",
+        `${API_BASE_URL}/api/student/profile`,
         data,
         {
           withCredentials: true,
@@ -74,7 +75,7 @@ export default function StudentProfile() {
       setProfile(res.data.user);
       setIsEditing(false);
       toast.success("Profile updated successfully!");
-      setPreview(`http://localhost:3000${res.data.user.picture}`);
+      setPreview(`${API_BASE_URL}${res.data.user.picture}`);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update profile");
     }

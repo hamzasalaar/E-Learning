@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 export default function TeacherProfile() {
   const [teacher, setTeacher] = useState(null);
@@ -15,14 +16,14 @@ export default function TeacherProfile() {
     const fetchProfile = async () => {
       try {
         const { data } = await axios.get(
-          "http://localhost:3000/api/teacher/profile",
+          `${API_BASE_URL}/api/teacher/profile`,
           {
             withCredentials: true,
           }
         );
         setTeacher(data.teacher);
         setName(data.teacher.name);
-        setPreview(`http://localhost:3000${data.teacher.picture}`);
+        setPreview(`${API_BASE_URL}${data.teacher.picture}`);
       } catch (err) {
         toast.error("Failed to load profile");
       }
@@ -45,7 +46,7 @@ export default function TeacherProfile() {
 
     try {
       const res = await axios.put(
-        "http://localhost:3000/api/teacher/update-profile",
+        `${API_BASE_URL}/api/teacher/update-profile`,
         formData,
         {
           withCredentials: true,
@@ -56,7 +57,7 @@ export default function TeacherProfile() {
       toast.success("Profile updated successfully!");
       setIsEditing(false);
       setTeacher(res.data.user);
-      setPreview(`http://localhost:3000${res.data.user.picture}`);
+      setPreview(`${API_BASE_URL}${res.data.user.picture}`);
       setPassword("");
       setConfirmPassword("");
     } catch (err) {

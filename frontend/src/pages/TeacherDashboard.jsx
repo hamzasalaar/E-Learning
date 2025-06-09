@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 const TeacherDashboard = () => {
   const [courses, setCourses] = useState([]);
@@ -9,7 +10,7 @@ const TeacherDashboard = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/teacher/courses", {
+        const res = await axios.get(`${API_BASE_URL}/api/teacher/courses`, {
           params: { limit: 1000 }, // large limit to fetch all
           withCredentials: true,
         });

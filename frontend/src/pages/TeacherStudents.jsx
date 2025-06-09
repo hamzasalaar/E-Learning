@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaUserGraduate } from "react-icons/fa";
 import { toast } from "react-hot-toast";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 const TeacherStudents = () => {
   const [courses, setCourses] = useState([]);
@@ -14,7 +15,7 @@ const TeacherStudents = () => {
     // Fetch teacher's courses
     const fetchCourses = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/teacher/courses", {
+        const res = await axios.get(`${API_BASE_URL}/api/teacher/courses`, {
           withCredentials: true,
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -39,7 +40,7 @@ const TeacherStudents = () => {
   const fetchStudents = async (courseId) => {
     setLoadingStudents(true);
     try {
-      const res = await axios.get(`http://localhost:3000/api/teacher/courses/${courseId}/enrollments`, {
+      const res = await axios.get(`${API_BASE_URL}/api/teacher/courses/${courseId}/enrollments`, {
         withCredentials: true,
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,

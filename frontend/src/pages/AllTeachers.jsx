@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../css/AllTeachers.css";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 export default function AllTeachers() {
   const [teachers, setTeachers] = useState([]);
@@ -11,7 +12,7 @@ export default function AllTeachers() {
     const fetchTeachers = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3000/api/public/teachers"
+          `${API_BASE_URL}/api/public/teachers`
         );
 
         // Guard against unexpected structure
@@ -44,7 +45,7 @@ export default function AllTeachers() {
               <img
                 src={
                   teacher.picture
-                    ? `http://localhost:3000${teacher.picture}`
+                    ? `${API_BASE_URL}${teacher.picture}`
                     : "https://i.postimg.cc/9M3h9DGf/teacher-1.jpg"
                 }
                 alt={teacher.name}
