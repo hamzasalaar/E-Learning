@@ -32,7 +32,7 @@ const UserSchema = new mongoose.Schema(
     picture: {
       type: String,
       default:
-        "https://iconarchive.com/download/i107128/Flat-User-Interface/User-Profile-2.ico",
+        "https://i.postimg.cc/4N5XCZsB/user-Image.png",
     },
     // lockUntil: {
     //   type: Date,

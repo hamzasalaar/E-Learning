@@ -5,7 +5,7 @@ import { FaPlay, FaChevronDown, FaChevronRight } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import MaterialForm from "../components/MaterialForm";
 import { MaterialCard, CourseContentStyles } from "../components/MaterialCard";
-import "../css/CourseContent.css"; // Assuming you have a CSS file for styles
+import "../css/CourseContent.css";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 const CourseContent = () => {

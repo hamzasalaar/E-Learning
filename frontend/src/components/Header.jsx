@@ -4,7 +4,8 @@ import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { useState } from "react";
 import { Logout } from "../redux/AuthSlice";
-// Removed from the top level and will be added inside the Header component
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 const Header = () => {
   const user = useSelector((state) => state.Auth.user);
@@ -17,7 +18,7 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/auth/logout",
+        `${API_BASE_URL}/api/auth/logout`,
         {},
         { withCredentials: true }
       );

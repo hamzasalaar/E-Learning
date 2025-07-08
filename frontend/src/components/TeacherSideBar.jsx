@@ -14,6 +14,7 @@ import {
   FaHome,
   FaBook,
 } from "react-icons/fa";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 export default function TeacherSidebar({ collapsed, isOpen }) {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ export default function TeacherSidebar({ collapsed, isOpen }) {
   const handleLogout = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/auth/logout",
+        `${API_BASE_URL}/api/auth/logout`,
         {},
         { withCredentials: true }
       );
@@ -51,7 +52,7 @@ export default function TeacherSidebar({ collapsed, isOpen }) {
           <img
             src={
               user?.picture
-                ? `http://localhost:3000${user.picture}`
+                ? `${API_BASE_URL}${user.picture}`
                 : "https://via.placeholder.com/60"
             }
             alt="Profile"

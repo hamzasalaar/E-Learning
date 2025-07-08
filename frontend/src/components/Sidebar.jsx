@@ -4,6 +4,7 @@ import { FaUser, FaCog, FaSignOutAlt, FaBars, FaTimes } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import "../css/Sidebar.css"; // Add your styles
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,7 +12,7 @@ export default function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      await axios.post("http://localhost:3000/api/auth/logout", {}, { withCredentials: true });
+      await axios.post(`${API_BASE_URL}/api/auth/logout`, {}, { withCredentials: true });
       toast.success("Logged out successfully!");
       navigate("/login");
     } catch (error) {

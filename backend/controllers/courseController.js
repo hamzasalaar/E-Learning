@@ -14,7 +14,6 @@ const createCourse = async (req, res) => {
       });
     }
 
-    // Validate required fields
     if (!title || !description || !price || (!imageUrl && !req.file)) {
       return res.status(400).json({
         success: false,
@@ -22,7 +21,6 @@ const createCourse = async (req, res) => {
       });
     }
 
-    // If image file was uploaded, use that
     if (req.file) {
       imageUrl = `/uploads/courseImages/${req.file.filename}`;
     }

@@ -1,10 +1,9 @@
-// uploadImage.js
 const multer = require("multer");
 const path = require("path");
 
 const imageStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/courseImages/"); // Create this folder if not exists
+    cb(null, "uploads/courseImages/");
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + "-" + file.originalname);
