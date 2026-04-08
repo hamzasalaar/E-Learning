@@ -6,6 +6,7 @@ const isAuthenticated = async (req, res, next) => {
     // get token from cookies
     let token = req.cookies?.token;
 
+    // Check if token is in the authorization headers
     if (!token && req.headers.authorization) {
       const authHeader = req.headers.authorization;
       if (authHeader.startsWith("Bearer ")) {
