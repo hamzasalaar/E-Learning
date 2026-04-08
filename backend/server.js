@@ -32,7 +32,7 @@ app.use(
     origin: function (origin, callback) {
       console.log(`CORS request from origin: ${origin}`);
       if (!origin || origin === "null") {
-        // Mobile apps (like Expo Go) often have no origin – allow it
+        
         return callback(null, true);
       }
 
