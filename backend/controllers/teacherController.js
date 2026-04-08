@@ -96,7 +96,7 @@ const resubmitCourse = async (req, res) => {
   }
 };
 
-// ✅ NEW: Get single course details
+// Get single course details
 const getSingleCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
